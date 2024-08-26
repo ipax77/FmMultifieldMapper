@@ -17,15 +17,35 @@ public static class FmMapper
         ArgumentNullException.ThrowIfNull(targetCollection);
 
         var multifields = GetMultifieldDtos(fmSource);
+        var existingEntries = targetCollection.ToList();
 
         foreach (var multifield in multifields)
         {
-            T fmTargetMultifield = new()
+            var existingMultifield = targetCollection
+                .FirstOrDefault(m => m.FmMultiField?.Name == multifield.Name
+                    && m.FmMultiFieldValue?.Value == multifield.Value);
+
+            if (existingMultifield is not null)
             {
-                FmMultiField = new() { Name = multifield.Name },
-                FmMultiFieldValue = new() { Value = multifield.Value, Order = multifield.Order }
-            };
-            targetCollection.Add(fmTargetMultifield);
+                ArgumentNullException.ThrowIfNull(existingMultifield.FmMultiField);
+                ArgumentNullException.ThrowIfNull(existingMultifield.FmMultiFieldValue);
+                existingMultifield.FmMultiFieldValue.Order = multifield.Order;
+                existingEntries.Remove(existingMultifield);
+            }
+            else
+            {
+                T fmTargetMultifield = new()
+                {
+                    FmMultiField = new() { Name = multifield.Name },
+                    FmMultiFieldValue = new() { Value = multifield.Value, Order = multifield.Order }
+                };
+
+                targetCollection.Add(fmTargetMultifield);
+            }
+        }
+        foreach (var entry in existingEntries)
+        {
+            targetCollection.Remove(entry);
         }
     }
 
