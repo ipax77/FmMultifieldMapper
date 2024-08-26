@@ -21,6 +21,10 @@ public static class FmMapper
 
         foreach (var multifield in multifields)
         {
+            if (multifield.Value is null)
+            {
+                continue;
+            }
             var existingMultifield = targetCollection
                 .FirstOrDefault(m => m.FmMultiField?.Name == multifield.Name
                     && m.FmMultiFieldValue?.Value == multifield.Value);

@@ -11,7 +11,7 @@ public sealed class FileMakerMultifieldAttribute : Attribute
     /// </summary>
     public string MultifieldName { get; set; } = string.Empty;
     /// <summary>
-    /// Optional order if DataMember Attribute is not set
+    /// Order
     /// </summary>
     public int Order { get; set; }
 }
