@@ -1,1 +1,152 @@
 # FileMaker Multifield mapper
+
+This library maps data between FileMaker-based DTO objects and relational database objects.
+
+## Installation
+
+You can install the library via NuGet:
+
+## Sample Usage
+
+### Implementing `FmMultifieldMap`
+
+To use the `FmMultifieldMapper`, you need to implement the abstract `FmMultifieldMap` class. 
+
+```csharp
+internal class InMemoryFmMultifieldMapper(TestContext context) : FmMultifieldMap
+{
+    public override async Task<int> GetOrCreateMultifieldId(string name)
+    {
+        var id = await context.Multifields
+            .Where(x => x.Name == name)
+            .Select(s => s.FmMultifieldId)
+            .FirstOrDefaultAsync();
+
+        if (id == 0)
+        {
+            var multifield = new FmMultifield() { Name = name };
+            context.Multifields.Add(multifield);
+            await context.SaveChangesAsync();
+            id = multifield.FmMultifieldId;
+        }
+        return id;
+    }
+
+    public override async Task<int> GetOrCreateMultifieldValueId(int multifieldId, string value)
+    {
+        var id = await context.MultifieldValues
+            .Where(x => x.FmMultifieldId == multifieldId && x.Value == value)
+            .Select(s => s.FmMultifieldValueId)
+            .FirstOrDefaultAsync();
+
+        if (id == 0)
+        {
+            var multifieldValue = new FmMultifieldValue()
+            {
+                FmMultifieldId = multifieldId,
+                Value = value
+            };
+            context.MultifieldValues.Add(multifieldValue);
+            await context.SaveChangesAsync();
+            id = multifieldValue.FmMultifieldValueId;
+        }
+        return id;
+    }
+}
+```
+
+### Mapping FileMaker Objects to Relational Database Objects
+
+Below is an example of how to map a FileMaker object (FmSourceTestClass) to a relational database object (FmTargetTestClassMultifield).
+
+```csharp
+    [DataContract(Name = "TestLayout")]
+    public class FmSourceTestClass
+    {
+        [NotMapped]
+        public int FileMakerRecordId { get; set; }
+        [DataMember(Name = "Themen(1)")]
+        [FileMakerMultifield(MultifieldName = "Themen", Order = 0)]
+        public string? Themen1 { get; set; }
+        [DataMember(Name = "Themen(2)")]
+        [FileMakerMultifield(MultifieldName = "Themen", Order = 1)]
+        public string? Themen2 { get; set; }
+        [DataMember(Name = "Themen(3)")]
+        [FileMakerMultifield(MultifieldName = "Themen", Order = 2)]
+        public string? Themen3 { get; set; }
+    }
+
+    public class FmTargetTestClassMultifield : IFmTargetMultifield
+    {
+        public int FmTargetTestClassMultifieldId { get; set; }
+        public int FmMultifieldId { get; set; }
+        public FmMultifield? FmMultiField { get; set; }
+        public int FmMultifieldValueId { get; set; }
+        public FmMultifieldValue? FmMultiFieldValue { get; set; }
+        public int FmTargetTestClassId { get; set; }
+        public FmTargetTestClass? FmTargetTestClass { get; set; }
+    }
+
+    var target = _dbContext.FmTargetTestClasses.FirstOrDefault();
+
+    var source = new FmSourceTestClass()
+    {
+        Themen1 = "Test3",
+        Themen2 = "Test4",
+        Themen3 = "Test5"
+    };
+
+    InMemoryFmMultifieldMapper mapper = new(_dbContext);
+    await mapper.Map(source, target.FmTargetTestClassMultifields);
+    _dbContext.SaveChanges();
+```
+
+## DTO mapping
+
+You can also map data from a DTO object to your database entities using `Dictionary<string, List<string>>`
+
+Here's how you can map a `FmTargetTestClassDto` to `FmTargetTestClass`:
+
+```csharp
+    FmTargetTestClassDto dto = new()
+    {
+        FmTargetTestClassMultifields = new()
+        {
+            { "Themen", ["Test1", "Test2", "Test3"] },
+            { "Was", ["WTest1", "WTest2", "WTest3"] },
+        }
+    };
+
+    CacheFmMultifieldMapper mapper = new(_dbContext);
+
+    FmTargetTestClass fmTargetTestClass = new();
+    _dbContext.FmTargetTestClasses.Add(fmTargetTestClass);
+    _dbContext.SaveChanges();
+
+    await mapper.MapFromDtoDictionary(dto.FmTargetTestClassMultifields, fmTargetTestClass.FmTargetTestClassMultifields);
+    _dbContext.SaveChanges();
+
+    var fmTargetTestClassWithIncludes = _dbContext.FmTargetTestClasses
+        .Include(i => i.FmTargetTestClassMultifields)
+            .ThenInclude(t => t.FmMultiField)
+        .Include(i => i.FmTargetTestClassMultifields)
+            .ThenInclude(t => t.FmMultiFieldValue)
+        .FirstOrDefault(f => f.Id == fmTargetTestClass.Id);
+
+    FmTargetTestClassDto testDto = new();
+    CacheFmMultifieldMapper.MapToDtoDictionary(fmTargetTestClassWithIncludes.FmTargetTestClassMultifields,
+        testDto.FmTargetTestClassMultifields);
+
+    Assert.AreEqual(dto.FmTargetTestClassMultifields.Count, testDto.FmTargetTestClassMultifields.Count);
+```
+
+All samples are available in the test project located at [`.src/FMMultifieldMapperTests`](./src/FMMultifieldMapperTests).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request. Make sure to follow the coding standards and include tests for any new features or bug fixes.
+

@@ -3,7 +3,7 @@
 /// <summary>
 /// FmMultifieldMapper
 /// </summary>
-public abstract class FmMultifieldMapper
+public abstract class FmMultifieldMap
 {
     /// <summary>
     /// GetOrCreateMultifieldId
@@ -82,7 +82,7 @@ public abstract class FmMultifieldMapper
     }
 
     /// <summary>
-    /// Map FmMultifields to Target collection
+    /// Map FmMultifields to Target collection using existing and creating new Multifields/MultifieldValues
     /// </summary>
     /// <typeparam name="T">The type of the target multifield, implementing IFmTargetMultifield</typeparam>
     /// <param name="fmSource">FileMaker source with FmMultifield attributes</param>
