@@ -14,7 +14,7 @@ public class FmMultifieldValue
     /// </summary>
     public string Value { get; set; } = string.Empty;
     /// <summary>
-    /// Order
+    /// Order - start with 0
     /// </summary>
     public int Order { get; set; }
     /// <summary>

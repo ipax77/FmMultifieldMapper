@@ -31,6 +31,8 @@ internal static class DbContextExtensions
 
         modelBuilder.Entity<FmMultifieldValue>(e =>
         {
+            // The comparison might be case insensitive
+            // e.Property(p => p.Value).UseCollation("utf8mb4_bin"); // e.g. for case sensitive for MySQL v5.7
             e.Property(p => p.Value).HasMaxLength(50);
             e.HasIndex(i => new { i.FmMultifieldId, i.Value }).IsUnique();
         });
