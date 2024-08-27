@@ -50,7 +50,8 @@ internal class CacheFmMultifieldMapper(TestContext context) : FmMultiFieldMap
     private bool isInit;
     private Dictionary<string, int> multifields = [];
     private Dictionary<MultifieldValueKey, int> multifieldValues = [];
-    private SemaphoreSlim ss = new(1, 1);
+    private readonly SemaphoreSlim initSs = new(1, 1);
+    private readonly SemaphoreSlim createSs = new(1, 1);
 
     private async Task Init()
     {
@@ -58,7 +59,7 @@ internal class CacheFmMultifieldMapper(TestContext context) : FmMultiFieldMap
         {
             return;
         }
-        await ss.WaitAsync();
+        await initSs.WaitAsync();
         try
         {
             if (!isInit)
@@ -72,7 +73,7 @@ internal class CacheFmMultifieldMapper(TestContext context) : FmMultiFieldMap
         }
         finally
         {
-            ss.Release();
+            initSs.Release();
         }
     }
 
@@ -81,10 +82,18 @@ internal class CacheFmMultifieldMapper(TestContext context) : FmMultiFieldMap
         await Init();
         if (!multifields.TryGetValue(name, out var id))
         {
-            var multifield = new FmMultiField() { Name = name };
-            context.Multifields.Add(multifield);
-            await context.SaveChangesAsync();
-            id = multifields[name] = multifield.FmMultiFieldId;
+            await createSs.WaitAsync();
+            try
+            {
+                var multifield = new FmMultiField() { Name = name };
+                context.Multifields.Add(multifield);
+                await context.SaveChangesAsync();
+                id = multifields[name] = multifield.FmMultiFieldId;
+            }
+            finally
+            {
+                createSs.Release();
+            }
         }
         return id;
     }
@@ -95,15 +104,23 @@ internal class CacheFmMultifieldMapper(TestContext context) : FmMultiFieldMap
         var key = new MultifieldValueKey(multifieldId, value);
         if (!multifieldValues.TryGetValue(key, out var id))
         {
-            var multifieldValue = new FmMultiFieldValue()
+            await createSs.WaitAsync();
+            try
             {
-                FmMultiFieldId = multifieldId,
-                Value = value,
-                Order = order
-            };
-            context.MultifieldValues.Add(multifieldValue);
-            await context.SaveChangesAsync();
-            id = multifieldValues[key] = multifieldValue.FmMultiFieldValueId;
+                var multifieldValue = new FmMultiFieldValue()
+                {
+                    FmMultiFieldId = multifieldId,
+                    Value = value,
+                    Order = order
+                };
+                context.MultifieldValues.Add(multifieldValue);
+                await context.SaveChangesAsync();
+                id = multifieldValues[key] = multifieldValue.FmMultiFieldValueId;
+            }
+            finally
+            {
+                createSs.Release();
+            }
         }
         return id;
     }

@@ -34,7 +34,7 @@ internal class InMemoryFmMultifieldMapper(TestContext context) : FmMultifieldMap
         return id;
     }
 
-    public override async Task<int> GetOrCreateMultifieldValueId(int multifieldId, string value)
+    public override async Task<int> GetOrCreateMultifieldValueId(int multifieldId, string value, int order)
     {
         var id = await context.MultifieldValues
             .Where(x => x.FmMultifieldId == multifieldId && x.Value == value)
@@ -46,7 +46,8 @@ internal class InMemoryFmMultifieldMapper(TestContext context) : FmMultifieldMap
             var multifieldValue = new FmMultifieldValue()
             {
                 FmMultifieldId = multifieldId,
-                Value = value
+                Value = value,
+                Order = order
             };
             context.MultifieldValues.Add(multifieldValue);
             await context.SaveChangesAsync();
