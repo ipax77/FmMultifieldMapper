@@ -1,3 +1,5 @@
+[![build and test](https://github.com/ipax77/FmMultifieldMapper/actions/workflows/tests.yml/badge.svg)](https://github.com/ipax77/FmMultifieldMapper/actions/workflows/tests.yml)
+
 # FileMaker Multifield mapper
 
 This library maps data between FileMaker-based DTO objects and relational database objects.
