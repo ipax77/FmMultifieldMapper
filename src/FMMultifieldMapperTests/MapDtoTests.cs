@@ -30,7 +30,7 @@ public class MapStoTests
         context.Multifields.Add(new()
         {
             Name = "Themen",
-            Values = new List<FmMultifieldValue>()
+            Values = new List<FmMultiFieldValue>()
             {
                 new() { Value = "Test1", Order = 1 },
                 new() { Value = "Test2", Order = 2 },
@@ -44,18 +44,18 @@ public class MapStoTests
             FmTargetTestClassMultifields = new List<FmTargetTestClassMultifield>()
             {
                 new() {
-                    FmMultifieldId = 1,
-                    FmMultifieldValueId = 1,
+                    FmMultiFieldId = 1,
+                    FmMultiFieldValueId = 1,
                 },
                 new()
                 {
-                    FmMultifieldId = 1,
-                    FmMultifieldValueId = 2,
+                    FmMultiFieldId = 1,
+                    FmMultiFieldValueId = 2,
                 },
                 new()
                 {
-                    FmMultifieldId = 1,
-                    FmMultifieldValueId = 3,
+                    FmMultiFieldId = 1,
+                    FmMultiFieldValueId = 3,
                 }
             }
         };

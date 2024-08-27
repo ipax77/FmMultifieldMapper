@@ -3,21 +3,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FMMultifieldMapperTests;
 
-internal class InMemoryFmMultifieldMapper(TestContext context) : FmMultifieldMap
+internal class InMemoryFmMultifieldMapper(TestContext context) : FmMultiFieldMap
 {
     public override async Task<int> GetOrCreateMultifieldId(string name)
     {
         var id = await context.Multifields
             .Where(x => x.Name == name)
-            .Select(s => s.FmMultifieldId)
+            .Select(s => s.FmMultiFieldId)
             .FirstOrDefaultAsync();
 
         if (id == 0)
         {
-            var multifield = new FmMultifield() { Name = name };
+            var multifield = new FmMultiField() { Name = name };
             context.Multifields.Add(multifield);
             await context.SaveChangesAsync();
-            id = multifield.FmMultifieldId;
+            id = multifield.FmMultiFieldId;
         }
         return id;
     }
@@ -25,26 +25,26 @@ internal class InMemoryFmMultifieldMapper(TestContext context) : FmMultifieldMap
     public override async Task<int> GetOrCreateMultifieldValueId(int multifieldId, string value)
     {
         var id = await context.MultifieldValues
-            .Where(x => x.FmMultifieldId == multifieldId && x.Value == value)
-            .Select(s => s.FmMultifieldValueId)
+            .Where(x => x.FmMultiFieldId == multifieldId && x.Value == value)
+            .Select(s => s.FmMultiFieldValueId)
             .FirstOrDefaultAsync();
 
         if (id == 0)
         {
-            var multifieldValue = new FmMultifieldValue()
+            var multifieldValue = new FmMultiFieldValue()
             {
-                FmMultifieldId = multifieldId,
+                FmMultiFieldId = multifieldId,
                 Value = value
             };
             context.MultifieldValues.Add(multifieldValue);
             await context.SaveChangesAsync();
-            id = multifieldValue.FmMultifieldValueId;
+            id = multifieldValue.FmMultiFieldValueId;
         }
         return id;
     }
 }
 
-internal class CacheFmMultifieldMapper(TestContext context) : FmMultifieldMap
+internal class CacheFmMultifieldMapper(TestContext context) : FmMultiFieldMap
 {
     private bool isInit;
     private Dictionary<string, int> multifields = [];
@@ -63,9 +63,9 @@ internal class CacheFmMultifieldMapper(TestContext context) : FmMultifieldMap
             if (!isInit)
             {
                 multifields = (await context.Multifields.ToListAsync())
-                    .ToDictionary(k => k.Name, v => v.FmMultifieldId);
+                    .ToDictionary(k => k.Name, v => v.FmMultiFieldId);
                 multifieldValues = (await context.MultifieldValues.ToListAsync())
-                    .ToDictionary(k => new MultifieldValueKey(k.FmMultifieldId, k.Value), v => v.FmMultifieldValueId);
+                    .ToDictionary(k => new MultifieldValueKey(k.FmMultiFieldId, k.Value), v => v.FmMultiFieldValueId);
                 isInit = true;
             }
         }
@@ -80,10 +80,10 @@ internal class CacheFmMultifieldMapper(TestContext context) : FmMultifieldMap
         await Init();
         if (!multifields.TryGetValue(name, out var id))
         {
-            var multifield = new FmMultifield() { Name = name };
+            var multifield = new FmMultiField() { Name = name };
             context.Multifields.Add(multifield);
             await context.SaveChangesAsync();
-            id = multifields[name] = multifield.FmMultifieldId;
+            id = multifields[name] = multifield.FmMultiFieldId;
         }
         return id;
     }
@@ -94,14 +94,14 @@ internal class CacheFmMultifieldMapper(TestContext context) : FmMultifieldMap
         var key = new MultifieldValueKey(multifieldId, value);
         if (!multifieldValues.TryGetValue(key, out var id))
         {
-            var multifieldValue = new FmMultifieldValue()
+            var multifieldValue = new FmMultiFieldValue()
             {
-                FmMultifieldId = multifieldId,
+                FmMultiFieldId = multifieldId,
                 Value = value
             };
             context.MultifieldValues.Add(multifieldValue);
             await context.SaveChangesAsync();
-            id = multifieldValues[key] = multifieldValue.FmMultifieldValueId;
+            id = multifieldValues[key] = multifieldValue.FmMultiFieldValueId;
         }
         return id;
     }

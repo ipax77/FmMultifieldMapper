@@ -11,7 +11,7 @@ public static class FmMapper
     /// <typeparam name="T">The type of the target multifield, implementing IFmTargetMultifield</typeparam>
     /// <param name="fmSource">FileMaker source with FmMultifield attributes</param>
     /// <param name="targetCollection">IFmTargetMultifield collection</param>
-    public static void Map<T>(object fmSource, ICollection<T> targetCollection) where T : IFmTargetMultifield, new()
+    public static void Map<T>(object fmSource, ICollection<T> targetCollection) where T : IFmTargetMultiField, new()
     {
         ArgumentNullException.ThrowIfNull(fmSource);
         ArgumentNullException.ThrowIfNull(targetCollection);

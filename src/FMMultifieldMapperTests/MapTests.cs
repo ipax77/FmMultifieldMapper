@@ -38,18 +38,18 @@ public partial class MapTests
         {
             new FmTargetTestClassMultifield
             {
-                FmMultiField = new FmMultifield { Name = "Themen" },
-                FmMultiFieldValue = new FmMultifieldValue { Value = "Test1", Order = 0 }
+                FmMultiField = new FmMultiField { Name = "Themen" },
+                FmMultiFieldValue = new FmMultiFieldValue { Value = "Test1", Order = 0 }
             },
             new FmTargetTestClassMultifield
             {
-                FmMultiField = new FmMultifield { Name = "Themen" },
-                FmMultiFieldValue = new FmMultifieldValue { Value = "Test3", Order = 2 }
+                FmMultiField = new FmMultiField { Name = "Themen" },
+                FmMultiFieldValue = new FmMultiFieldValue { Value = "Test3", Order = 2 }
             },
             new FmTargetTestClassMultifield
             {
-                FmMultiField = new FmMultifield { Name = "ObsoleteThemen" },
-                FmMultiFieldValue = new FmMultifieldValue { Value = "Obsolete", Order = 99 }
+                FmMultiField = new FmMultiField { Name = "ObsoleteThemen" },
+                FmMultiFieldValue = new FmMultiFieldValue { Value = "Obsolete", Order = 99 }
             }
         };
 

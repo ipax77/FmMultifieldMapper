@@ -3,12 +3,12 @@ namespace FMMultifieldMapper;
 /// <summary>
 /// FmMultifield
 /// </summary>
-public class FmMultifield
+public class FmMultiField
 {
     /// <summary>
     /// Index
     /// </summary>
-    public int FmMultifieldId { get; set; }
+    public int FmMultiFieldId { get; set; }
     /// <summary>
     /// Name
     /// </summary>
@@ -17,6 +17,6 @@ public class FmMultifield
     /// FmMultifield Values
     /// </summary>
 #pragma warning disable CA2227 // Collection properties should be read only
-    public ICollection<FmMultifieldValue> Values { get; set; } = [];
+    public ICollection<FmMultiFieldValue> Values { get; set; } = [];
 #pragma warning restore CA2227 // Collection properties should be read only
 }

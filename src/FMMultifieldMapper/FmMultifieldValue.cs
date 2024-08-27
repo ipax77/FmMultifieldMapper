@@ -3,12 +3,12 @@ namespace FMMultifieldMapper;
 /// <summary>
 /// FmMultifieldValue
 /// </summary>
-public class FmMultifieldValue
+public class FmMultiFieldValue
 {
     /// <summary>
     /// Index
     /// </summary>
-    public int FmMultifieldValueId { get; set; }
+    public int FmMultiFieldValueId { get; set; }
     /// <summary>
     /// Value
     /// </summary>
@@ -20,9 +20,9 @@ public class FmMultifieldValue
     /// <summary>
     /// FmMultifieldId
     /// </summary>
-    public int FmMultifieldId { get; set; }
+    public int FmMultiFieldId { get; set; }
     /// <summary>
     /// FmMultifield
     /// </summary>
-    public FmMultifield? FmMultifield { get; set; }
+    public FmMultiField? FmMultifield { get; set; }
 }

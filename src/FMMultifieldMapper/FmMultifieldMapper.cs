@@ -1,9 +1,9 @@
 ﻿namespace FMMultifieldMapper;
 
 /// <summary>
-/// FmMultifieldMapper
+/// FmMultiFieldMap
 /// </summary>
-public abstract class FmMultifieldMap
+public abstract class FmMultiFieldMap
 {
     /// <summary>
     /// GetOrCreateMultifieldId
@@ -16,8 +16,9 @@ public abstract class FmMultifieldMap
     /// </summary>
     /// <param name="multifieldId">Linked MultifieldId</param>
     /// <param name="value">MultifieldValue value</param>
+    /// <param name="order">MultifieldValue value</param>
     /// <returns></returns>
-    public abstract Task<int> GetOrCreateMultifieldValueId(int multifieldId, string value);
+    public abstract Task<int> GetOrCreateMultifieldValueId(int multifieldId, string value, int order);
 
     /// <summary>
     /// Map sourceCollection to fmObject FmMultifield attribute properties
@@ -25,7 +26,7 @@ public abstract class FmMultifieldMap
     /// <typeparam name="T"></typeparam>
     /// <param name="sourceCollection"></param>
     /// <param name="fmTarget"></param>
-    public static void MapToFmObject<T>(ICollection<T> sourceCollection, object fmTarget) where T : IFmTargetMultifield, new()
+    public static void MapToFmObject<T>(ICollection<T> sourceCollection, object fmTarget) where T : IFmTargetMultiField, new()
     {
         ArgumentNullException.ThrowIfNull(sourceCollection);
 
@@ -87,7 +88,7 @@ public abstract class FmMultifieldMap
     /// <typeparam name="T">The type of the target multifield, implementing IFmTargetMultifield</typeparam>
     /// <param name="fmSource">FileMaker source with FmMultifield attributes</param>
     /// <param name="targetCollection">IFmTargetMultifield collection</param>
-    public async Task Map<T>(object fmSource, ICollection<T> targetCollection) where T : IFmTargetMultifield, new()
+    public async Task Map<T>(object fmSource, ICollection<T> targetCollection) where T : IFmTargetMultiField, new()
     {
         ArgumentNullException.ThrowIfNull(fmSource);
         ArgumentNullException.ThrowIfNull(targetCollection);
@@ -97,7 +98,7 @@ public abstract class FmMultifieldMap
     }
 
     private async Task MapMultifields<T>(List<MultifieldDto> targetMultifields, ICollection<T> targetCollection)
-        where T : IFmTargetMultifield, new()
+        where T : IFmTargetMultiField, new()
     {
         var existingEntries = targetCollection.ToList();
 
@@ -109,14 +110,14 @@ public abstract class FmMultifieldMap
 
             foreach (var targetMultifield in multifieldGroup)
             {
-                if (targetMultifield is null || targetMultifield.Value is null)
+                if (targetMultifield is null || string.IsNullOrEmpty(targetMultifield.Value))
                 {
                     continue;
                 }
 
                 var multifieldValue = targetMultifield.Value;
-                var multifieldValueId = await GetOrCreateMultifieldValueId(multifieldId, multifieldValue)
-                        .ConfigureAwait(false);
+                var multifieldValueId = await GetOrCreateMultifieldValueId(multifieldId, multifieldValue,
+                    targetMultifield.Order).ConfigureAwait(false);
 
                 var existingMultifield = targetCollection
                     .FirstOrDefault(m => m.FmMultiField?.Name == targetMultifield.Name
@@ -133,8 +134,8 @@ public abstract class FmMultifieldMap
                 {
                     T fmTargetMultifield = new()
                     {
-                        FmMultifieldId = multifieldId,
-                        FmMultifieldValueId = multifieldValueId
+                        FmMultiFieldId = multifieldId,
+                        FmMultiFieldValueId = multifieldValueId
                     };
                     targetCollection.Add(fmTargetMultifield);
                 }
@@ -185,7 +186,7 @@ public abstract class FmMultifieldMap
     /// <typeparam name="T"></typeparam>
     /// <param name="targetCollection"></param>
     /// <param name="dtoMultifields"></param>
-    public static void MapToDtoDictionary<T>(ICollection<T> targetCollection, Dictionary<string, List<string>> dtoMultifields) where T : IFmTargetMultifield, new()
+    public static void MapToDtoDictionary<T>(ICollection<T> targetCollection, Dictionary<string, List<string>> dtoMultifields) where T : IFmTargetMultiField, new()
     {
         ArgumentNullException.ThrowIfNull(targetCollection);
         ArgumentNullException.ThrowIfNull(dtoMultifields);
@@ -212,7 +213,7 @@ public abstract class FmMultifieldMap
     /// <param name="targetCollection"></param>
     /// <returns></returns>
     public async Task MapFromDtoDictionary<T>(Dictionary<string, List<string>> dtoMultifields, ICollection<T> targetCollection)
-        where T : IFmTargetMultifield, new()
+        where T : IFmTargetMultiField, new()
     {
         ArgumentNullException.ThrowIfNull(dtoMultifields);
         ArgumentNullException.ThrowIfNull(targetCollection);
