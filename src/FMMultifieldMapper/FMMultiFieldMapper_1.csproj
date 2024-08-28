@@ -3,8 +3,8 @@
     <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Description>FileMaker Multifield to relational database mapper</Description>
-    <PackageTags>FileMaker;Multifield;mapper</PackageTags>
+    <Description>FileMaker MultiField to relational database mapper</Description>
+    <PackageTags>FileMaker;MultiField;mapper</PackageTags>
       <AssemblyVersion>0.1.0.0</AssemblyVersion>
     <Owners>Philipp Hetzner</Owners>
     <Authors>Philipp Hetzner</Authors>

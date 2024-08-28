@@ -1,4 +1,4 @@
-namespace FMMultifieldMapper;
+namespace FMMultiFieldMapper;
 
 /// <summary>
 /// Describes a FileMakerMultifield

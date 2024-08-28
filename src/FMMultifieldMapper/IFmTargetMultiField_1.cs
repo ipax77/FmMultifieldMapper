@@ -1,4 +1,4 @@
-namespace FMMultifieldMapper;
+namespace FMMultiFieldMapper;
 
 /// <summary>
 /// IFmTargetMultifield
