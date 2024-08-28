@@ -1,12 +1,12 @@
 namespace FMMultiFieldMapper;
 
 /// <summary>
-/// IFmTargetMultifield
+/// IFmTargetMultiField
 /// </summary>
 public interface IFmTargetMultiField
 {
     /// <summary>
-    /// FmMultifieldId
+    /// FmMultiFieldId
     /// </summary>
     public int FmMultiFieldId { get; set; }
     /// <summary>
@@ -14,7 +14,7 @@ public interface IFmTargetMultiField
     /// </summary>
     public FmMultiField? FmMultiField { get; set; }
     /// <summary>
-    /// FmMultifieldValueId
+    /// FmMultiFieldValueId
     /// </summary>
     public int FmMultiFieldValueId { get; set; }
     /// <summary>
@@ -24,14 +24,14 @@ public interface IFmTargetMultiField
 }
 
 /// <summary>
-/// IFmTargetMultifieldDto
+/// IFmTargetMultiFieldDto
 /// </summary>
-public interface IFmTargetMultifieldDto
+public interface IFmTargetMultiFieldDto
 {
     /// <summary>
-    /// FmMultifields
+    /// FmMultiFields
     /// </summary>
 #pragma warning disable CA2227 // Collection properties should be read only
-    public Dictionary<string, List<string>> FmMultifields { get; set; }
+    public Dictionary<string, List<string>> FmMultiFields { get; set; }
 #pragma warning restore CA2227 // Collection properties should be read only
 }

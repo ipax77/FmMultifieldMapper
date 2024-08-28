@@ -6,17 +6,17 @@
 public static class FmMapper
 {
     /// <summary>
-    /// Map FmMultifield to Target collection
+    /// Map FmMultiField to Target collection
     /// </summary>
-    /// <typeparam name="T">The type of the target multifield, implementing IFmTargetMultifield</typeparam>
-    /// <param name="fmSource">FileMaker source with FmMultifield attributes</param>
-    /// <param name="targetCollection">IFmTargetMultifield collection</param>
+    /// <typeparam name="T">The type of the target multifield, implementing IFmTargetMultiField</typeparam>
+    /// <param name="fmSource">FileMaker source with FmMultiField attributes</param>
+    /// <param name="targetCollection">IFmTargetMultiField collection</param>
     public static void Map<T>(object fmSource, ICollection<T> targetCollection) where T : IFmTargetMultiField, new()
     {
         ArgumentNullException.ThrowIfNull(fmSource);
         ArgumentNullException.ThrowIfNull(targetCollection);
 
-        var multifields = GetMultifieldDtos(fmSource);
+        var multifields = GetMultiFieldDtos(fmSource);
         var existingEntries = targetCollection.ToList();
 
         foreach (var multifield in multifields)
@@ -25,26 +25,26 @@ public static class FmMapper
             {
                 continue;
             }
-            var existingMultifield = targetCollection
+            var existingMultiField = targetCollection
                 .FirstOrDefault(m => m.FmMultiField?.Name == multifield.Name
                     && m.FmMultiFieldValue?.Value == multifield.Value);
 
-            if (existingMultifield is not null)
+            if (existingMultiField is not null)
             {
-                ArgumentNullException.ThrowIfNull(existingMultifield.FmMultiField);
-                ArgumentNullException.ThrowIfNull(existingMultifield.FmMultiFieldValue);
-                existingMultifield.FmMultiFieldValue.Order = multifield.Order;
-                existingEntries.Remove(existingMultifield);
+                ArgumentNullException.ThrowIfNull(existingMultiField.FmMultiField);
+                ArgumentNullException.ThrowIfNull(existingMultiField.FmMultiFieldValue);
+                existingMultiField.FmMultiFieldValue.Order = multifield.Order;
+                existingEntries.Remove(existingMultiField);
             }
             else
             {
-                T fmTargetMultifield = new()
+                T fmTargetMultiField = new()
                 {
                     FmMultiField = new() { Name = multifield.Name },
                     FmMultiFieldValue = new() { Value = multifield.Value, Order = multifield.Order }
                 };
 
-                targetCollection.Add(fmTargetMultifield);
+                targetCollection.Add(fmTargetMultiField);
             }
         }
         foreach (var entry in existingEntries)
@@ -53,20 +53,20 @@ public static class FmMapper
         }
     }
 
-    private static List<MultifieldDto> GetMultifieldDtos(object fmSource)
+    private static List<MultiFieldDto> GetMultiFieldDtos(object fmSource)
     {
-        List<MultifieldDto> dtos = [];
+        List<MultiFieldDto> dtos = [];
         var sourceProperties = fmSource.GetType().GetProperties();
         foreach (var prop in sourceProperties)
         {
-            if (prop.GetCustomAttributes(typeof(FileMakerMultifieldAttribute), false)
-                                 .FirstOrDefault() is FileMakerMultifieldAttribute attribute)
+            if (prop.GetCustomAttributes(typeof(FileMakerMultiFieldAttribute), false)
+                                 .FirstOrDefault() is FileMakerMultiFieldAttribute attribute)
             {
-                dtos.Add(new(attribute.MultifieldName, prop.GetValue(fmSource)?.ToString(), attribute.Order));
+                dtos.Add(new(attribute.MultiFieldName, prop.GetValue(fmSource)?.ToString(), attribute.Order));
             }
         }
         return dtos;
     }
 }
 
-internal sealed record MultifieldDto(string Name, string? Value, int Order);
+internal sealed record MultiFieldDto(string Name, string? Value, int Order);

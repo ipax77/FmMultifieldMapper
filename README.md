@@ -15,43 +15,43 @@ You can install the library via NuGet:
 To use the `FmMultifieldMapper`, you need to implement the abstract `FmMultifieldMap` class. 
 
 ```csharp
-internal class InMemoryFmMultifieldMapper(TestContext context) : FmMultifieldMap
+internal class InMemoryFmMultiFieldMapper(TestContext context) : FmMultiFieldMap
 {
-    public override async Task<int> GetOrCreateMultifieldId(string name)
+    public override async Task<int> GetOrCreateMultiFieldId(string name)
     {
         var id = await context.Multifields
             .Where(x => x.Name == name)
-            .Select(s => s.FmMultifieldId)
+            .Select(s => s.FmMultiFieldId)
             .FirstOrDefaultAsync();
 
         if (id == 0)
         {
-            var multifield = new FmMultifield() { Name = name };
+            var multifield = new FmMultiField() { Name = name };
             context.Multifields.Add(multifield);
             await context.SaveChangesAsync();
-            id = multifield.FmMultifieldId;
+            id = multifield.FmMultiFieldId;
         }
         return id;
     }
 
-    public override async Task<int> GetOrCreateMultifieldValueId(int multifieldId, string value, int order)
+    public override async Task<int> GetOrCreateMultiFieldValueId(int multifieldId, string value, int order)
     {
         var id = await context.MultifieldValues
-            .Where(x => x.FmMultifieldId == multifieldId && x.Value == value)
-            .Select(s => s.FmMultifieldValueId)
+            .Where(x => x.FmMultiFieldId == multifieldId && x.Value == value)
+            .Select(s => s.FmMultiFieldValueId)
             .FirstOrDefaultAsync();
 
         if (id == 0)
         {
-            var multifieldValue = new FmMultifieldValue()
+            var multifieldValue = new FmMultiFieldValue()
             {
-                FmMultifieldId = multifieldId,
+                FmMultiFieldId = multifieldId,
                 Value = value,
                 Order = order
             };
             context.MultifieldValues.Add(multifieldValue);
             await context.SaveChangesAsync();
-            id = multifieldValue.FmMultifieldValueId;
+            id = multifieldValue.FmMultiFieldValueId;
         }
         return id;
     }
@@ -63,45 +63,45 @@ internal class InMemoryFmMultifieldMapper(TestContext context) : FmMultifieldMap
 Below is an example of how to map a FileMaker object (FmSourceTestClass) to a relational database object (FmTargetTestClassMultifield).
 
 ```csharp
-    [DataContract(Name = "TestLayout")]
-    public class FmSourceTestClass
-    {
-        [NotMapped]
-        public int FileMakerRecordId { get; set; }
-        [DataMember(Name = "Themen(1)")]
-        [FileMakerMultifield(MultifieldName = "Themen", Order = 0)]
-        public string? Themen1 { get; set; }
-        [DataMember(Name = "Themen(2)")]
-        [FileMakerMultifield(MultifieldName = "Themen", Order = 1)]
-        public string? Themen2 { get; set; }
-        [DataMember(Name = "Themen(3)")]
-        [FileMakerMultifield(MultifieldName = "Themen", Order = 2)]
-        public string? Themen3 { get; set; }
-    }
+[DataContract(Name = "TestLayout")]
+public class FmSourceTestClass
+{
+    [NotMapped]
+    public int FileMakerRecordId { get; set; }
+    [DataMember(Name = "Themen(1)")]
+    [FileMakerMultiField(MultiFieldName = "Themen", Order = 0)]
+    public string? Themen1 { get; set; }
+    [DataMember(Name = "Themen(2)")]
+    [FileMakerMultiField(MultiFieldName = "Themen", Order = 1)]
+    public string? Themen2 { get; set; }
+    [DataMember(Name = "Themen(3)")]
+    [FileMakerMultiField(MultiFieldName = "Themen", Order = 2)]
+    public string? Themen3 { get; set; }
+}
 
-    public class FmTargetTestClassMultifield : IFmTargetMultifield
-    {
-        public int FmTargetTestClassMultifieldId { get; set; }
-        public int FmMultifieldId { get; set; }
-        public FmMultifield? FmMultiField { get; set; }
-        public int FmMultifieldValueId { get; set; }
-        public FmMultifieldValue? FmMultiFieldValue { get; set; }
-        public int FmTargetTestClassId { get; set; }
-        public FmTargetTestClass? FmTargetTestClass { get; set; }
-    }
+public class FmTargetTestClassMultifield : IFmTargetMultiField
+{
+    public int FmTargetTestClassMultifieldId { get; set; }
+    public int FmMultiFieldId { get; set; }
+    public FmMultiField? FmMultiField { get; set; }
+    public int FmMultiFieldValueId { get; set; }
+    public FmMultiFieldValue? FmMultiFieldValue { get; set; }
+    public int FmTargetTestClassId { get; set; }
+    public FmTargetTestClass? FmTargetTestClass { get; set; }
+}
 
-    var target = _dbContext.FmTargetTestClasses.FirstOrDefault();
+var target = _dbContext.FmTargetTestClasses.FirstOrDefault();
 
-    var source = new FmSourceTestClass()
-    {
-        Themen1 = "Test3",
-        Themen2 = "Test4",
-        Themen3 = "Test5"
-    };
+var source = new FmSourceTestClass()
+{
+    Themen1 = "Test3",
+    Themen2 = "Test4",
+    Themen3 = "Test5"
+};
 
-    InMemoryFmMultifieldMapper mapper = new(_dbContext);
-    await mapper.Map(source, target.FmTargetTestClassMultifields);
-    _dbContext.SaveChanges();
+InMemoryFmMultiFieldMapper mapper = new(_dbContext);
+await mapper.Map(source, target.FmTargetTestClassMultifields);
+_dbContext.SaveChanges();
 ```
 
 ## DTO mapping
@@ -111,36 +111,39 @@ You can also map data from a DTO object to your database entities using `Diction
 Here's how you can map a `FmTargetTestClassDto` to `FmTargetTestClass`:
 
 ```csharp
-    FmTargetTestClassDto dto = new()
+FmTargetTestClassDto dto = new()
+{
+    FmTargetTestClassMultifields = new()
     {
-        FmTargetTestClassMultifields = new()
-        {
-            { "Themen", ["Test1", "Test2", "Test3"] },
-            { "Was", ["WTest1", "WTest2", "WTest3"] },
-        }
-    };
+        { "Themen", ["Test1", "Test2", "Test3"] },
+        { "Was", ["WTest1", "WTest2", "WTest3"] },
+    }
+};
 
-    CacheFmMultifieldMapper mapper = new(_dbContext);
+CacheFmMultiFieldMapper mapper = new(_dbContext);
 
-    FmTargetTestClass fmTargetTestClass = new();
-    _dbContext.FmTargetTestClasses.Add(fmTargetTestClass);
-    _dbContext.SaveChanges();
+FmTargetTestClass fmTargetTestClass = new();
+_dbContext.FmTargetTestClasses.Add(fmTargetTestClass);
+_dbContext.SaveChanges();
 
-    await mapper.MapFromDtoDictionary(dto.FmTargetTestClassMultifields, fmTargetTestClass.FmTargetTestClassMultifields);
-    _dbContext.SaveChanges();
+await mapper.MapFromDtoDictionary(dto.FmTargetTestClassMultifields, fmTargetTestClass.FmTargetTestClassMultifields);
+_dbContext.SaveChanges();
 
-    var fmTargetTestClassWithIncludes = _dbContext.FmTargetTestClasses
-        .Include(i => i.FmTargetTestClassMultifields)
-            .ThenInclude(t => t.FmMultiField)
-        .Include(i => i.FmTargetTestClassMultifields)
-            .ThenInclude(t => t.FmMultiFieldValue)
-        .FirstOrDefault(f => f.Id == fmTargetTestClass.Id);
+var fmTargetTestClassWithIncludes = _dbContext.FmTargetTestClasses
+    .Include(i => i.FmTargetTestClassMultifields)
+        .ThenInclude(t => t.FmMultiField)
+    .Include(i => i.FmTargetTestClassMultifields)
+        .ThenInclude(t => t.FmMultiFieldValue)
+    .FirstOrDefault(f => f.Id == fmTargetTestClass.Id);
 
-    FmTargetTestClassDto testDto = new();
-    CacheFmMultifieldMapper.MapToDtoDictionary(fmTargetTestClassWithIncludes.FmTargetTestClassMultifields,
-        testDto.FmTargetTestClassMultifields);
+Assert.IsNotNull(fmTargetTestClassWithIncludes);
+Assert.AreEqual(6, fmTargetTestClassWithIncludes.FmTargetTestClassMultifields.Count);
 
-    Assert.AreEqual(dto.FmTargetTestClassMultifields.Count, testDto.FmTargetTestClassMultifields.Count);
+FmTargetTestClassDto testDto = new();
+CacheFmMultiFieldMapper.MapToDtoDictionary(fmTargetTestClassWithIncludes.FmTargetTestClassMultifields,
+    testDto.FmTargetTestClassMultifields);
+
+Assert.AreEqual(dto.FmTargetTestClassMultifields.Count, testDto.FmTargetTestClassMultifields.Count);
 ```
 
 All samples are available in the test project located at [`.src/FMMultifieldMapperTests`](./src/FMMultifieldMapperTests).

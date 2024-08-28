@@ -21,7 +21,7 @@ public class MapFmTests
 
         FmSourceTestClass fmTarget = new();
 
-        CacheFmMultifieldMapper.MapToFmObject(dto.FmTargetTestClassMultifields, fmTarget);
+        CacheFmMultiFieldMapper.MapToFmObject(dto.FmTargetTestClassMultifields, fmTarget);
 
         Assert.AreEqual(dto.FmTargetTestClassMultifields["Themen"][0], fmTarget.Themen1);
         Assert.AreEqual(dto.FmTargetTestClassMultifields["Themen"][1], fmTarget.Themen2);
@@ -41,7 +41,7 @@ public class MapFmTests
 
         FmSourceTestClass fmTarget = new();
 
-        CacheFmMultifieldMapper.MapToFmObject(dto.FmTargetTestClassMultifields, fmTarget);
+        CacheFmMultiFieldMapper.MapToFmObject(dto.FmTargetTestClassMultifields, fmTarget);
 
         Assert.AreEqual(dto.FmTargetTestClassMultifields["Themen"][0], fmTarget.Themen1);
         Assert.AreEqual(dto.FmTargetTestClassMultifields["Themen"][1], fmTarget.Themen2);

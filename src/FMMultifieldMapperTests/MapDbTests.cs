@@ -1,4 +1,4 @@
-﻿using FMMultifieldMapper;
+﻿using FMMultiFieldMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace FMMultifieldMapperTests;
@@ -78,7 +78,7 @@ public class MapDbTests
             Themen3 = "Test5"
         };
 
-        InMemoryFmMultifieldMapper mapper = new(_dbContext);
+        InMemoryFmMultiFieldMapper mapper = new(_dbContext);
         await mapper.Map(source, target.FmTargetTestClassMultifields);
         _dbContext.SaveChanges();
 
@@ -101,7 +101,7 @@ public class MapDbTests
             Themen3 = "Test5"
         };
 
-        CacheFmMultifieldMapper mapper = new(_dbContext);
+        CacheFmMultiFieldMapper mapper = new(_dbContext);
         await mapper.Map(source, target.FmTargetTestClassMultifields);
         _dbContext.SaveChanges();
 
@@ -123,7 +123,7 @@ public class MapDbTests
             Themen3 = "NewTest3"
         };
 
-        var mapper = new InMemoryFmMultifieldMapper(_dbContext);
+        var mapper = new InMemoryFmMultiFieldMapper(_dbContext);
         await mapper.Map(source, target.FmTargetTestClassMultifields);
         _dbContext.SaveChanges();
 
@@ -146,7 +146,7 @@ public class MapDbTests
             Themen3 = "NewTest6" // New value
         };
 
-        var mapper = new InMemoryFmMultifieldMapper(_dbContext);
+        var mapper = new InMemoryFmMultiFieldMapper(_dbContext);
         await mapper.Map(source, target.FmTargetTestClassMultifields);
         _dbContext.SaveChanges();
 
@@ -170,7 +170,7 @@ public class MapDbTests
         // Provide an empty source
         var source = new FmSourceTestClass();
 
-        var mapper = new InMemoryFmMultifieldMapper(_dbContext);
+        var mapper = new InMemoryFmMultiFieldMapper(_dbContext);
         await mapper.Map(source, target.FmTargetTestClassMultifields);
         _dbContext.SaveChanges();
 
@@ -192,7 +192,7 @@ public class MapDbTests
             Themen2 = "Test1"  // Duplicate value
         };
 
-        var mapper = new InMemoryFmMultifieldMapper(_dbContext);
+        var mapper = new InMemoryFmMultiFieldMapper(_dbContext);
         await mapper.Map(source, target.FmTargetTestClassMultifields);
         _dbContext.SaveChanges();
 

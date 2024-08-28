@@ -1,11 +1,11 @@
-﻿using FMMultifieldMapper;
+﻿using FMMultiFieldMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace FMMultifieldMapperTests;
 
-internal class InMemoryFmMultifieldMapper(TestContext context) : FmMultiFieldMap
+internal class InMemoryFmMultiFieldMapper(TestContext context) : FmMultiFieldMap
 {
-    public override async Task<int> GetOrCreateMultifieldId(string name)
+    public override async Task<int> GetOrCreateMultiFieldId(string name)
     {
         var id = await context.Multifields
             .Where(x => x.Name == name)
@@ -22,7 +22,7 @@ internal class InMemoryFmMultifieldMapper(TestContext context) : FmMultiFieldMap
         return id;
     }
 
-    public override async Task<int> GetOrCreateMultifieldValueId(int multifieldId, string value, int order)
+    public override async Task<int> GetOrCreateMultiFieldValueId(int multifieldId, string value, int order)
     {
         var id = await context.MultifieldValues
             .Where(x => x.FmMultiFieldId == multifieldId && x.Value == value)
@@ -45,7 +45,7 @@ internal class InMemoryFmMultifieldMapper(TestContext context) : FmMultiFieldMap
     }
 }
 
-internal class CacheFmMultifieldMapper(TestContext context) : FmMultiFieldMap
+internal class CacheFmMultiFieldMapper(TestContext context) : FmMultiFieldMap
 {
     private bool isInit;
     private Dictionary<string, int> multifields = [];
@@ -77,7 +77,7 @@ internal class CacheFmMultifieldMapper(TestContext context) : FmMultiFieldMap
         }
     }
 
-    public override async Task<int> GetOrCreateMultifieldId(string name)
+    public override async Task<int> GetOrCreateMultiFieldId(string name)
     {
         await Init();
         if (!multifields.TryGetValue(name, out var id))
@@ -98,7 +98,7 @@ internal class CacheFmMultifieldMapper(TestContext context) : FmMultiFieldMap
         return id;
     }
 
-    public override async Task<int> GetOrCreateMultifieldValueId(int multifieldId, string value, int order)
+    public override async Task<int> GetOrCreateMultiFieldValueId(int multifieldId, string value, int order)
     {
         await Init();
         var key = new MultifieldValueKey(multifieldId, value);

@@ -1,7 +1,7 @@
 namespace FMMultiFieldMapper;
 
 /// <summary>
-/// FmMultifield
+/// FmMultiField
 /// </summary>
 public class FmMultiField
 {
@@ -14,7 +14,7 @@ public class FmMultiField
     /// </summary>
     public string Name { get; set; } = string.Empty;
     /// <summary>
-    /// FmMultifield Values
+    /// FmMultiField Values
     /// </summary>
 #pragma warning disable CA2227 // Collection properties should be read only
     public ICollection<FmMultiFieldValue> Values { get; set; } = [];

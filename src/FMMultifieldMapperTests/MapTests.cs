@@ -1,4 +1,4 @@
-using FMMultifieldMapper;
+using FMMultiFieldMapper;
 
 namespace FMMultifieldMapperTests;
 

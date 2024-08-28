@@ -1,7 +1,7 @@
 namespace FMMultiFieldMapper;
 
 /// <summary>
-/// FmMultifieldValue
+/// FmMultiFieldValue
 /// </summary>
 public class FmMultiFieldValue
 {
@@ -18,11 +18,11 @@ public class FmMultiFieldValue
     /// </summary>
     public int Order { get; set; }
     /// <summary>
-    /// FmMultifieldId
+    /// FmMultiFieldId
     /// </summary>
     public int FmMultiFieldId { get; set; }
     /// <summary>
-    /// FmMultifield
+    /// FmMultiField
     /// </summary>
-    public FmMultiField? FmMultifield { get; set; }
+    public FmMultiField? FmMultiField { get; set; }
 }

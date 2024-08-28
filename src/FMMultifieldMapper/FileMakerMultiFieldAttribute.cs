@@ -1,15 +1,15 @@
 namespace FMMultiFieldMapper;
 
 /// <summary>
-/// Describes a FileMakerMultifield
+/// Describes a FileMakerMultiField
 /// </summary>
 [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-public sealed class FileMakerMultifieldAttribute : Attribute
+public sealed class FileMakerMultiFieldAttribute : Attribute
 {
     /// <summary>
     /// Map target name
     /// </summary>
-    public string MultifieldName { get; set; } = string.Empty;
+    public string MultiFieldName { get; set; } = string.Empty;
     /// <summary>
     /// Order - start with 0
     /// </summary>

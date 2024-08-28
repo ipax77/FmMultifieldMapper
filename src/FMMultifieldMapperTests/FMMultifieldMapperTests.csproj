@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FMMultifieldMapper\FMMultifieldMapper.csproj" />
+    <ProjectReference Include="..\FMMultifieldMapper\FMMultiFieldMapper.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿using FMMultifieldMapper;
+﻿using FMMultiFieldMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace FMMultifieldMapperTests;
@@ -75,7 +75,7 @@ public class MapStoTests
             }
         };
 
-        CacheFmMultifieldMapper mapper = new(_dbContext);
+        CacheFmMultiFieldMapper mapper = new(_dbContext);
 
         FmTargetTestClass fmTargetTestClass = new();
         _dbContext.FmTargetTestClasses.Add(fmTargetTestClass);
@@ -95,7 +95,7 @@ public class MapStoTests
         Assert.AreEqual(6, fmTargetTestClassWithIncludes.FmTargetTestClassMultifields.Count);
 
         FmTargetTestClassDto testDto = new();
-        CacheFmMultifieldMapper.MapToDtoDictionary(fmTargetTestClassWithIncludes.FmTargetTestClassMultifields,
+        CacheFmMultiFieldMapper.MapToDtoDictionary(fmTargetTestClassWithIncludes.FmTargetTestClassMultifields,
             testDto.FmTargetTestClassMultifields);
 
         Assert.AreEqual(dto.FmTargetTestClassMultifields.Count, testDto.FmTargetTestClassMultifields.Count);
