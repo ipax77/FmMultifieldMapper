@@ -2,7 +2,7 @@
 
 # FileMaker Multifield mapper
 
-This library maps data between FileMaker-based DTO objects and relational database objects.
+This library maps data between [FileMaker](https://www.claris.com/)-based DTO objects and relational database objects.
 
 ## Installation
 
@@ -34,7 +34,7 @@ internal class InMemoryFmMultiFieldMapper(TestContext context) : FmMultiFieldMap
         return id;
     }
 
-    public override async Task<int> GetOrCreateMultiFieldValueId(int multifieldId, string value, int order)
+    public override async Task<int> GetOrCreateMultiFieldValueId(int multifieldId, string value)
     {
         var id = await context.MultifieldValues
             .Where(x => x.FmMultiFieldId == multifieldId && x.Value == value)
@@ -46,8 +46,7 @@ internal class InMemoryFmMultiFieldMapper(TestContext context) : FmMultiFieldMap
             var multifieldValue = new FmMultiFieldValue()
             {
                 FmMultiFieldId = multifieldId,
-                Value = value,
-                Order = order
+                Value = value
             };
             context.MultifieldValues.Add(multifieldValue);
             await context.SaveChangesAsync();
@@ -88,6 +87,7 @@ public class FmTargetTestClassMultifield : IFmTargetMultiField
     public FmMultiFieldValue? FmMultiFieldValue { get; set; }
     public int FmTargetTestClassId { get; set; }
     public FmTargetTestClass? FmTargetTestClass { get; set; }
+    public int Order { get; set; }
 }
 
 var target = _dbContext.FmTargetTestClasses.FirstOrDefault();
