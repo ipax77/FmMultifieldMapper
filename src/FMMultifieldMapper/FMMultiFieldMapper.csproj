@@ -5,7 +5,8 @@
     <Nullable>enable</Nullable>
     <Description>FileMaker MultiField to relational database mapper</Description>
     <PackageTags>FileMaker;MultiField;mapper</PackageTags>
-      <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
     <Owners>Philipp Hetzner</Owners>
     <Authors>Philipp Hetzner</Authors>
     <Version>0.1.0</Version>
@@ -30,10 +31,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>.</PackagePath>
-    </None>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <ItemGroup>

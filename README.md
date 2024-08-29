@@ -1,18 +1,21 @@
 [![build and test](https://github.com/ipax77/FmMultifieldMapper/actions/workflows/tests.yml/badge.svg)](https://github.com/ipax77/FmMultifieldMapper/actions/workflows/tests.yml)
 
-# FileMaker Multifield mapper
+# FileMaker MultiField mapper
 
-This library maps data between [FileMaker](https://www.claris.com/)-based DTO objects and relational database objects.
+This library maps data between [FileMaker](https://www.claris.com/)-based DTO objects and relational database objects. The focus is on multi-fields that are easily filterable.
 
 ## Installation
 
 You can install the library via NuGet:
+```
+dotnet add package FMMultiFieldMapper
+```
 
 ## Sample Usage
 
-### Implementing `FmMultifieldMap`
+### Implementing `FmMultiFieldMap`
 
-To use the `FmMultifieldMapper`, you need to implement the abstract `FmMultifieldMap` class. 
+To use the `FmMultiFieldMapper`, you need to implement the abstract `FmMultiFieldMap` class. 
 
 ```csharp
 internal class InMemoryFmMultiFieldMapper(TestContext context) : FmMultiFieldMap
