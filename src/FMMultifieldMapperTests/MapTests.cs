@@ -39,17 +39,17 @@ public partial class MapTests
             new FmTargetTestClassMultifield
             {
                 FmMultiField = new FmMultiField { Name = "Themen" },
-                FmMultiFieldValue = new FmMultiFieldValue { Value = "Test1", Order = 0 }
+                FmMultiFieldValue = new FmMultiFieldValue { Value = "Test1" }
             },
             new FmTargetTestClassMultifield
             {
                 FmMultiField = new FmMultiField { Name = "Themen" },
-                FmMultiFieldValue = new FmMultiFieldValue { Value = "Test3", Order = 2 }
+                FmMultiFieldValue = new FmMultiFieldValue { Value = "Test3" }
             },
             new FmTargetTestClassMultifield
             {
                 FmMultiField = new FmMultiField { Name = "ObsoleteThemen" },
-                FmMultiFieldValue = new FmMultiFieldValue { Value = "Obsolete", Order = 99 }
+                FmMultiFieldValue = new FmMultiFieldValue { Value = "Obsolete" }
             }
         };
 
@@ -57,7 +57,7 @@ public partial class MapTests
 
         var targetMultifields = targetCollection
             .Where(f => f.FmMultiField?.Name == "Themen")
-            .OrderBy(f => f.FmMultiFieldValue?.Order)
+            .OrderBy(f => f.Order)
             .ToList();
 
         Assert.AreEqual(3, targetMultifields.Count);

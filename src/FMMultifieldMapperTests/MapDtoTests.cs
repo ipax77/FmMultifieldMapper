@@ -32,9 +32,9 @@ public class MapStoTests
             Name = "Themen",
             Values = new List<FmMultiFieldValue>()
             {
-                new() { Value = "Test1", Order = 1 },
-                new() { Value = "Test2", Order = 2 },
-                new() { Value = "Test3", Order = 3 }
+                new() { Value = "Test1" },
+                new() { Value = "Test2" },
+                new() { Value = "Test3" }
             }
         });
         context.SaveChanges();

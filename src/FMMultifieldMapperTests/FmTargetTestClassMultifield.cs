@@ -11,4 +11,5 @@ public class FmTargetTestClassMultifield : IFmTargetMultiField
     public FmMultiFieldValue? FmMultiFieldValue { get; set; }
     public int FmTargetTestClassId { get; set; }
     public FmTargetTestClass? FmTargetTestClass { get; set; }
+    public int Order { get; set; }
 }

@@ -33,7 +33,7 @@ public static class FmMapper
             {
                 ArgumentNullException.ThrowIfNull(existingMultiField.FmMultiField);
                 ArgumentNullException.ThrowIfNull(existingMultiField.FmMultiFieldValue);
-                existingMultiField.FmMultiFieldValue.Order = multifield.Order;
+                existingMultiField.Order = multifield.Order;
                 existingEntries.Remove(existingMultiField);
             }
             else
@@ -41,7 +41,7 @@ public static class FmMapper
                 T fmTargetMultiField = new()
                 {
                     FmMultiField = new() { Name = multifield.Name },
-                    FmMultiFieldValue = new() { Value = multifield.Value, Order = multifield.Order }
+                    FmMultiFieldValue = new() { Value = multifield.Value }
                 };
 
                 targetCollection.Add(fmTargetMultiField);

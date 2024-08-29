@@ -16,9 +16,8 @@ public abstract class FmMultiFieldMap
     /// </summary>
     /// <param name="multifieldId">Linked MultiFieldId</param>
     /// <param name="value">MultiFieldValue value</param>
-    /// <param name="order">MultiFieldValue value</param>
     /// <returns></returns>
-    public abstract Task<int> GetOrCreateMultiFieldValueId(int multifieldId, string value, int order);
+    public abstract Task<int> GetOrCreateMultiFieldValueId(int multifieldId, string value);
 
     /// <summary>
     /// Map sourceCollection to fmObject FmMultiField attribute properties
@@ -39,7 +38,7 @@ public abstract class FmMultiFieldMap
                 continue;
             }
             var list = group
-                .OrderBy(o => o.FmMultiFieldValue?.Order)
+                .OrderBy(o => o.Order)
                 .Select(s => s.FmMultiFieldValue?.Value ?? string.Empty)
                 .ToList();
             fmMultiFields[name] = list;
@@ -116,8 +115,8 @@ public abstract class FmMultiFieldMap
                 }
 
                 var multifieldValue = targetMultiField.Value;
-                var multifieldValueId = await GetOrCreateMultiFieldValueId(multifieldId, multifieldValue,
-                    targetMultiField.Order).ConfigureAwait(false);
+                var multifieldValueId = await GetOrCreateMultiFieldValueId(multifieldId, multifieldValue)
+                        .ConfigureAwait(false);
 
                 var existingMultiField = targetCollection
                     .FirstOrDefault(m => m.FmMultiField?.Name == targetMultiField.Name
@@ -127,7 +126,7 @@ public abstract class FmMultiFieldMap
                 {
                     ArgumentNullException.ThrowIfNull(existingMultiField.FmMultiField);
                     ArgumentNullException.ThrowIfNull(existingMultiField.FmMultiFieldValue);
-                    existingMultiField.FmMultiFieldValue.Order = targetMultiField.Order;
+                    existingMultiField.Order = targetMultiField.Order;
                     existingEntries.Remove(existingMultiField);
                 }
                 else
@@ -198,7 +197,7 @@ public abstract class FmMultiFieldMap
                 continue;
             }
             List<string> values = group
-                .OrderBy(o => o.FmMultiFieldValue?.Order)
+                .OrderBy(o => o.Order)
                 .Select(s => s.FmMultiFieldValue?.Value ?? string.Empty)
                 .ToList();
             dtoMultiFields[group.Key] = values;

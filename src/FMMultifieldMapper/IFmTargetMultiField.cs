@@ -21,6 +21,10 @@ public interface IFmTargetMultiField
     /// FmMultiFieldValue
     /// </summary>
     public FmMultiFieldValue? FmMultiFieldValue { get; set; }
+    /// <summary>
+    /// Order - start with 0
+    /// </summary>
+    public int Order { get; set; }
 }
 
 /// <summary>
