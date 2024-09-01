@@ -19,8 +19,8 @@ public abstract class FmSyncService<TFmEntity, TDbEntity, TFmSyncEntity>
     {
         await PrepareSync(token).ConfigureAwait(false);
 
-        var fmSyncs = await GetFmSyncs<IFmSync>(token).ConfigureAwait(false);
-        var dbSyncsDict = (await GetDbSyncs<IFmDbObject>(token).ConfigureAwait(false))
+        var fmSyncs = await GetFmSyncs<TFmSyncEntity>(token).ConfigureAwait(false);
+        var dbSyncsDict = (await GetDbSyncs<TDbEntity>(token).ConfigureAwait(false))
             .ToDictionary(k => k.FileMakerRecordId, v => v.ModificationDate);
 
         SyncResult result = new();
@@ -70,13 +70,15 @@ public abstract class FmSyncService<TFmEntity, TDbEntity, TFmSyncEntity>
     /// Get FileMaker sync information for TFmEntity
     /// </summary>
     /// <returns></returns>
-    public abstract Task<ICollection<SyncInfo>> GetFmSyncs<T>(CancellationToken token);
+    public abstract Task<ICollection<SyncInfo>> GetFmSyncs<T>(CancellationToken token)
+        where T : class, TFmSyncEntity, new();
     /// <summary>
     /// Get database sync information for TDbEntity
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    public abstract Task<ICollection<SyncInfo>> GetDbSyncs<T>(CancellationToken token);
+    public abstract Task<ICollection<SyncInfo>> GetDbSyncs<T>(CancellationToken token)
+        where T : class, IFmDbObject, new();
 
 
     /// <summary>

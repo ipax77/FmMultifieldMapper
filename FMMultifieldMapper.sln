@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FMMultifieldMapper", "src\F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FMMultifieldMapperTests", "src\FMMultifieldMapperTests\FMMultifieldMapperTests.csproj", "{24794378-43CD-4129-819A-1B361C257B1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FmSyncTests", "src\FmSyncTests\FmSyncTests.csproj", "{4F9D8707-7CE7-4B51-92E9-F9AC033828EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +28,14 @@ Global
 		{24794378-43CD-4129-819A-1B361C257B1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24794378-43CD-4129-819A-1B361C257B1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24794378-43CD-4129-819A-1B361C257B1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F9D8707-7CE7-4B51-92E9-F9AC033828EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F9D8707-7CE7-4B51-92E9-F9AC033828EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F9D8707-7CE7-4B51-92E9-F9AC033828EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F9D8707-7CE7-4B51-92E9-F9AC033828EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{556F5C49-1EED-4F7D-9C53-857394B488E4} = {809D121E-80F9-42F7-8D7F-2D7F36B19989}
 		{24794378-43CD-4129-819A-1B361C257B1C} = {809D121E-80F9-42F7-8D7F-2D7F36B19989}
+		{4F9D8707-7CE7-4B51-92E9-F9AC033828EB} = {809D121E-80F9-42F7-8D7F-2D7F36B19989}
 	EndGlobalSection
 EndGlobal
