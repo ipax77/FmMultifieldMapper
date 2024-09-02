@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FMMultifieldMapperTests;
 
-internal class TestContext : DbContext
+public class DbTestContext : DbContext
 {
     public DbSet<FmMultiField> Multifields { get; set; }
     public DbSet<FmMultiFieldValue> MultifieldValues { get; set; }
     public DbSet<FmTargetTestClassMultifield> FmTargetTestClassMultifields { get; set; }
     public DbSet<FmTargetTestClass> FmTargetTestClasses { get; set; }
 
-    public TestContext(DbContextOptions<TestContext> options) : base(options) { }
+    public DbTestContext(DbContextOptions<DbTestContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

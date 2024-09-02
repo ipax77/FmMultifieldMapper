@@ -28,11 +28,20 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Install dependencies
+    - name: Install dependencies for FMMultifieldMapperTests
       run: dotnet restore ./src/FMMultifieldMapperTests/FMMultifieldMapperTests.csproj
-      
-    - name: Build
+
+    - name: Build FMMultifieldMapperTests
       run: dotnet build --configuration Release --no-restore ./src/FMMultifieldMapperTests/FMMultifieldMapperTests.csproj
     
-    - name: Test
+    - name: Test FMMultifieldMapperTests
       run: dotnet test --no-restore --verbosity normal ./src/FMMultifieldMapperTests/FMMultifieldMapperTests.csproj
+
+    - name: Install dependencies for FmSyncTests
+      run: dotnet restore ./src/FmSyncTests/FmSyncTests.csproj
+
+    - name: Build FmSyncTests
+      run: dotnet build --configuration Release --no-restore ./src/FmSyncTests/FmSyncTests.csproj
+    
+    - name: Test FmSyncTests
+      run: dotnet test --no-restore --verbosity normal ./src/FmSyncTests/FmSyncTests.csproj

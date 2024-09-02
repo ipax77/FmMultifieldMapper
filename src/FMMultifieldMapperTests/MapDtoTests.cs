@@ -6,16 +6,16 @@ namespace FMMultifieldMapperTests;
 [TestClass]
 public class MapStoTests
 {
-    private TestContext _dbContext = null!;
+    private DbTestContext _dbContext = null!;
 
     [TestInitialize]
     public void Setup()
     {
-        var options = new DbContextOptionsBuilder<TestContext>()
+        var options = new DbContextOptionsBuilder<DbTestContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        _dbContext = new TestContext(options);
+        _dbContext = new DbTestContext(options);
         SeedDb(_dbContext);
     }
 
@@ -25,7 +25,7 @@ public class MapStoTests
         _dbContext.Dispose(); // Cleanup after each test
     }
 
-    private static void SeedDb(TestContext context)
+    private static void SeedDb(DbTestContext context)
     {
         context.Multifields.Add(new()
         {
@@ -95,8 +95,9 @@ public class MapStoTests
         Assert.AreEqual(6, fmTargetTestClassWithIncludes.FmTargetTestClassMultifields.Count);
 
         FmTargetTestClassDto testDto = new();
-        CacheFmMultiFieldMapper.MapToDtoDictionary(fmTargetTestClassWithIncludes.FmTargetTestClassMultifields,
-            testDto.FmTargetTestClassMultifields);
+        testDto.FmTargetTestClassMultifields = FmMultiFieldMap
+            .GetDtoDictionary(fmTargetTestClassWithIncludes.FmTargetTestClassMultifields);
+
 
         Assert.AreEqual(dto.FmTargetTestClassMultifields.Count, testDto.FmTargetTestClassMultifields.Count);
 

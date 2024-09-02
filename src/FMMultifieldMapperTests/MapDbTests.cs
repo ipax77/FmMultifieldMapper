@@ -6,16 +6,16 @@ namespace FMMultifieldMapperTests;
 [TestClass]
 public class MapDbTests
 {
-    private TestContext _dbContext = null!;
+    private DbTestContext _dbContext = null!;
 
     [TestInitialize]
     public void Setup()
     {
-        var options = new DbContextOptionsBuilder<TestContext>()
+        var options = new DbContextOptionsBuilder<DbTestContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        _dbContext = new TestContext(options);
+        _dbContext = new DbTestContext(options);
         SeedDb(_dbContext);
     }
 
@@ -25,7 +25,7 @@ public class MapDbTests
         _dbContext.Dispose(); // Cleanup after each test
     }
 
-    private static void SeedDb(TestContext context)
+    private static void SeedDb(DbTestContext context)
     {
         context.Multifields.Add(new()
         {

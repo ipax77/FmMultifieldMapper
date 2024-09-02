@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FMMultifieldMapperTests;
 
-internal class InMemoryFmMultiFieldMapper(TestContext context) : FmMultiFieldMap
+public class InMemoryFmMultiFieldMapper(DbTestContext context) : FmMultiFieldMap
 {
     public override async Task<int> GetOrCreateMultiFieldId(string name)
     {
@@ -44,7 +44,7 @@ internal class InMemoryFmMultiFieldMapper(TestContext context) : FmMultiFieldMap
     }
 }
 
-internal class CacheFmMultiFieldMapper(TestContext context) : FmMultiFieldMap
+public class CacheFmMultiFieldMapper(DbTestContext context) : FmMultiFieldMap
 {
     private bool isInit;
     private Dictionary<string, int> multifields = [];
