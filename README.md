@@ -1,3 +1,4 @@
+![Nuget](https://img.shields.io/nuget/v/FMMultiFieldMapper)
 [![build and test](https://github.com/ipax77/FmMultifieldMapper/actions/workflows/tests.yml/badge.svg)](https://github.com/ipax77/FmMultifieldMapper/actions/workflows/tests.yml)
 
 # FileMaker MultiField mapper
