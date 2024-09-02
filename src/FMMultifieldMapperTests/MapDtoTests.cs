@@ -95,8 +95,9 @@ public class MapStoTests
         Assert.AreEqual(6, fmTargetTestClassWithIncludes.FmTargetTestClassMultifields.Count);
 
         FmTargetTestClassDto testDto = new();
-        CacheFmMultiFieldMapper.MapToDtoDictionary(fmTargetTestClassWithIncludes.FmTargetTestClassMultifields,
-            testDto.FmTargetTestClassMultifields);
+        testDto.FmTargetTestClassMultifields = FmMultiFieldMap
+            .GetDtoDictionary(fmTargetTestClassWithIncludes.FmTargetTestClassMultifields);
+
 
         Assert.AreEqual(dto.FmTargetTestClassMultifields.Count, testDto.FmTargetTestClassMultifields.Count);
 

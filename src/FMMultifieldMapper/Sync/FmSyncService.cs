@@ -13,6 +13,11 @@ public abstract class FmSyncService<TFmEntity, TDbEntity, TFmSyncEntity>
     where TFmSyncEntity : class, IFmSync, new()
 {
     /// <summary>
+    /// SyncResult
+    /// </summary>
+    public SyncResult SyncResult { get; private set; } = new();
+
+    /// <summary>
     /// Synchronize TFmEntity to TDbEntity
     /// </summary>
     public async Task<SyncResult> Sync(CancellationToken token = default)
@@ -21,9 +26,9 @@ public abstract class FmSyncService<TFmEntity, TDbEntity, TFmSyncEntity>
 
         var fmSyncs = await GetFmSyncs<TFmSyncEntity>(token).ConfigureAwait(false);
         var dbSyncsDict = (await GetDbSyncs<TDbEntity>(token).ConfigureAwait(false))
-            .ToDictionary(k => k.FileMakerRecordId, v => v.ModificationDate);
+            .ToDictionary(k => k.FileMakerRecordId, v => v.SyncTime);
 
-        SyncResult result = new();
+        SyncResult = new();
 
         foreach (var fmSync in fmSyncs)
         {
@@ -33,51 +38,55 @@ public abstract class FmSyncService<TFmEntity, TDbEntity, TFmSyncEntity>
                 {
                     if (await UpdateEntity(fmSync.FileMakerRecordId, token).ConfigureAwait(false))
                     {
-                        result.Updated++;
+                        SyncResult.Updated++;
                     }
                     else
                     {
-                        result.Errors++;
+                        SyncResult.Errors++;
                     }
                 }
                 else
                 {
-                    result.UpToDate++;
+                    SyncResult.UpToDate++;
                 }
             }
             else
             {
                 if (await CreateEntity(fmSync.FileMakerRecordId, token).ConfigureAwait(false))
                 {
-                    result.Created++;
+                    SyncResult.Created++;
                 }
                 else
                 {
-                    result.Errors++;
+                    SyncResult.Errors++;
                 }
             }
         }
 
-        await DeleteEntities(dbSyncsDict.Keys.Except(fmSyncs.Select(s => s.FileMakerRecordId)).ToList(), token)
+        var toDeleteIds = dbSyncsDict.Keys.Except(fmSyncs.Select(s => s.FileMakerRecordId)).ToList();
+        var deleted = await DeleteEntities(toDeleteIds, token)
             .ConfigureAwait(false);
+
+        SyncResult.Deleted = deleted;
+        SyncResult.Errors += toDeleteIds.Count - deleted;
 
         await LinkEntities(token).ConfigureAwait(false);
 
-        return result;
+        return SyncResult;
     }
 
     /// <summary>
-    /// Get FileMaker sync information for TFmEntity
+    /// Get FileMaker TFmEntity modification time
     /// </summary>
     /// <returns></returns>
-    public abstract Task<ICollection<SyncInfo>> GetFmSyncs<T>(CancellationToken token)
+    public abstract Task<ICollection<FmSyncInfo>> GetFmSyncs<T>(CancellationToken token)
         where T : class, TFmSyncEntity, new();
     /// <summary>
-    /// Get database sync information for TDbEntity
+    /// Get database TDbEntity syncronization time
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    public abstract Task<ICollection<SyncInfo>> GetDbSyncs<T>(CancellationToken token)
+    public abstract Task<ICollection<DbSyncInfo>> GetDbSyncs<T>(CancellationToken token)
         where T : class, IFmDbObject, new();
 
 
@@ -98,7 +107,7 @@ public abstract class FmSyncService<TFmEntity, TDbEntity, TFmSyncEntity>
     protected abstract Task<int> DeleteEntities(ICollection<int> toDeleteIds, CancellationToken token);
 
     /// <summary>
-    /// Initialize job if needed
+    /// Initialize sync if required
     /// </summary>
     /// <returns></returns>
     protected virtual Task PrepareSync(CancellationToken token)
@@ -107,7 +116,7 @@ public abstract class FmSyncService<TFmEntity, TDbEntity, TFmSyncEntity>
     }
 
     /// <summary>
-    /// Link to other tables if needed
+    /// Link to other tables if required
     /// </summary>
     /// <returns></returns>
     protected virtual Task LinkEntities(CancellationToken token)

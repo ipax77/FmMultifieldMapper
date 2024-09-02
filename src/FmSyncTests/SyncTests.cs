@@ -55,7 +55,7 @@ public class SyncTests
                 ModificationDate = "01/01/2020"
             });
 
-        SyncService syncService = new(_dbContext, mockFmClient.Object);
+        TestSyncService syncService = new(_dbContext, mockFmClient.Object);
 
         await syncService.Sync();
 
@@ -103,7 +103,7 @@ public class SyncTests
                 ModificationDate = "02/01/2020"
             });
 
-        SyncService syncService = new(_dbContext, mockFmClient.Object);
+        TestSyncService syncService = new(_dbContext, mockFmClient.Object);
 
         // Act
         await syncService.Sync();
@@ -137,7 +137,7 @@ public class SyncTests
             It.IsAny<Func<FmSourceTestClassSync, int, object>>()))
                 .ReturnsAsync(new List<FmSourceTestClassSync>());
 
-        SyncService syncService = new(_dbContext, mockFmClient.Object);
+        TestSyncService syncService = new(_dbContext, mockFmClient.Object);
 
         // Act
         await syncService.Sync();
@@ -176,7 +176,7 @@ public class SyncTests
                 }
                 });
 
-        SyncService syncService = new(_dbContext, mockFmClient.Object);
+        TestSyncService syncService = new(_dbContext, mockFmClient.Object);
 
         // Act
         await syncService.Sync();

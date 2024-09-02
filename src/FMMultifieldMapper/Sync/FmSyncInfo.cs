@@ -1,9 +1,9 @@
 namespace FMMultiFieldMapper.Sync;
 
 /// <summary>
-/// SyncInfo
+/// FmSyncInfo
 /// </summary>
-public sealed record SyncInfo
+public sealed record FmSyncInfo
 {
     /// <summary>
     /// FileMakerRecordId

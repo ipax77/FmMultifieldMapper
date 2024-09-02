@@ -1,4 +1,6 @@
-﻿namespace FMMultiFieldMapper;
+﻿using FMMultiFieldMapper.Sync;
+
+namespace FMMultiFieldMapper;
 
 /// <summary>
 /// FmMultiFieldMap
@@ -180,15 +182,15 @@ public abstract class FmMultiFieldMap
     }
 
     /// <summary>
-    /// Maps the targetCollection to a dictionary of multifield names to their values.
+    /// Maps the targetCollection to a dictionary of multifield names and their values.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="targetCollection"></param>
-    /// <param name="dtoMultiFields"></param>
-    public static void MapToDtoDictionary<T>(ICollection<T> targetCollection, Dictionary<string, List<string>> dtoMultiFields) where T : IFmTargetMultiField, new()
+    public static Dictionary<string, List<string>> GetDtoDictionary<T>(ICollection<T> targetCollection)
+        where T : IFmTargetMultiField, new()
     {
         ArgumentNullException.ThrowIfNull(targetCollection);
-        ArgumentNullException.ThrowIfNull(dtoMultiFields);
+        var dtoMultiFields = new Dictionary<string, List<string>>();
 
         foreach (var group in targetCollection.GroupBy(g => g.FmMultiField?.Name))
         {
@@ -202,6 +204,36 @@ public abstract class FmMultiFieldMap
                 .ToList();
             dtoMultiFields[group.Key] = values;
         }
+        return dtoMultiFields;
+    }
+
+    /// <summary>
+    /// Maps fmObject multi-fields to a dictionary of multifield names and their values.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="fmObject"></param>
+    public static Dictionary<string, List<string>> GetDtoDictionary<T>(T fmObject) where T : IFmObject, new()
+    {
+        ArgumentNullException.ThrowIfNull(fmObject);
+        var dtoMultiFields = new Dictionary<string, List<string>>();
+
+        var targetMultiFields = GetMultiFieldDtos(fmObject);
+        foreach (var group in targetMultiFields
+            .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+            .GroupBy(g => g.Name))
+        {
+            if (string.IsNullOrEmpty(group.Key))
+            {
+                continue;
+            }
+            List<string> values = group
+                .OrderBy(o => o.Order)
+                .Select(s => s.Value ?? string.Empty)
+                .ToList();
+            dtoMultiFields[group.Key] = values;
+        }
+
+        return dtoMultiFields;
     }
 
     /// <summary>
@@ -218,7 +250,6 @@ public abstract class FmMultiFieldMap
         ArgumentNullException.ThrowIfNull(targetCollection);
 
         var targetMultiFields = GetMultiFieldDtos(dtoMultiFields);
-        var existingEntries = targetCollection.ToList();
         await MapMultiFields(targetMultiFields, targetCollection).ConfigureAwait(false);
     }
 

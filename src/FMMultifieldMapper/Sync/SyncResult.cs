@@ -30,4 +30,8 @@ public record SyncResult
     /// Errors
     /// </summary>
     public int Errors { get; set; }
+    /// <summary>
+    /// Exceptions
+    /// </summary>
+    public ICollection<string> ErrorInfos { get; } = [];
 }

@@ -7,23 +7,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FmSyncTests;
 
-public class SyncService(DbTestContext context, IFileMakerApiClient fmClient) : FmSyncService<FmSourceTestClass, FmTargetTestClass, FmSourceTestClassSync>
+public class TestSyncService(DbTestContext context, IFileMakerApiClient fmClient)
+    : FmSyncService<FmSourceTestClass, FmTargetTestClass, FmSourceTestClassSync>
 {
     private readonly DbTestContext context = context;
     private readonly IFileMakerApiClient fmClient = fmClient;
 
-    public override async Task<ICollection<SyncInfo>> GetDbSyncs<T>(CancellationToken token)
+    public override async Task<ICollection<DbSyncInfo>> GetDbSyncs<T>(CancellationToken token)
     {
         var syncs = from e in context.Set<T>()
-                    select new SyncInfo()
+                    select new DbSyncInfo()
                     {
                         FileMakerRecordId = e.FileMakerRecordId,
-                        ModificationDate = e.SyncTime
+                        SyncTime = e.SyncTime
                     };
         return await syncs.ToListAsync(token);
     }
 
-    public override async Task<ICollection<SyncInfo>> GetFmSyncs<T>(CancellationToken token)
+    public override async Task<ICollection<FmSyncInfo>> GetFmSyncs<T>(CancellationToken token)
     {
         T fmSync = new();
         List<T> fmSyncs = [];
@@ -40,7 +41,7 @@ public class SyncService(DbTestContext context, IFileMakerApiClient fmClient) : 
             }
             i++;
         }
-        return fmSyncs.Select(s => new SyncInfo()
+        return fmSyncs.Select(s => new FmSyncInfo()
         {
             FileMakerRecordId = s.FileMakerRecordId,
             ModificationDate = GetDateTimeFromFmString(s.ModificationDate)
@@ -67,8 +68,9 @@ public class SyncService(DbTestContext context, IFileMakerApiClient fmClient) : 
             dbEntity.SyncTime = DateTime.UtcNow;
             await context.SaveChangesAsync(token);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            SyncResult.ErrorInfos.Add($"Failed updating {fileMakerRecordId}: {ex.Message}");
             return false;
         }
         return true;
@@ -96,8 +98,9 @@ public class SyncService(DbTestContext context, IFileMakerApiClient fmClient) : 
 
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            SyncResult.ErrorInfos.Add($"Failed creating {fileMakerRecordId}: {ex.Message}");
             return false;
         }
     }
@@ -109,22 +112,34 @@ public class SyncService(DbTestContext context, IFileMakerApiClient fmClient) : 
             return 0;
         }
 
-        // For non in memory databases:
-        // return await context.FmTargetTestClasses
-        //     .Where(x => ids.Contains(x.FileMakerRecordId))
-        //     .ExecuteDeleteAsync(token);
-
-        int i = 0;
-        foreach (var entity in context.FmTargetTestClasses.Where(x => toDeleteIds.Contains(x.FileMakerRecordId)))
+        try
         {
-            context.FmTargetTestClasses.Remove(entity);
-            i++;
+            if (context.Database.IsInMemory())
+            {
+                int i = 0;
+                foreach (var entity in context.FmTargetTestClasses.Where(x => toDeleteIds.Contains(x.FileMakerRecordId)))
+                {
+                    context.FmTargetTestClasses.Remove(entity);
+                    i++;
+                }
+                await context.SaveChangesAsync(token);
+                return i;
+            }
+            else
+            {
+                return await context.FmTargetTestClasses
+                    .Where(x => toDeleteIds.Contains(x.FileMakerRecordId))
+                    .ExecuteDeleteAsync(token);
+            }
         }
-        await context.SaveChangesAsync(token);
-        return i;
+        catch (Exception ex)
+        {
+            SyncResult.ErrorInfos.Add($"Failed deleting {toDeleteIds.Count} entities: {ex.Message}");
+            return 0;
+        }
     }
 
-    private static DateTime GetDateTimeFromFmString(string? source)
+    private DateTime GetDateTimeFromFmString(string? source)
     {
         if (string.IsNullOrWhiteSpace(source))
         {
@@ -138,6 +153,10 @@ public class SyncService(DbTestContext context, IFileMakerApiClient fmClient) : 
         if (DateTime.TryParseExact(source, formats, culture, styles, out DateTime dateValue))
         {
             return dateValue;
+        }
+        else
+        {
+            SyncResult.ErrorInfos.Add($"Failed parsing FM date: {source}");
         }
 
         return DateTime.MinValue;
