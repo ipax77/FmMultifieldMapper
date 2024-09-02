@@ -168,8 +168,8 @@ Contributions are welcome! Please open an issue or submit a pull request. Make s
 
 <details open="open"><summary>v0.2.0</summary>
 
->- **Breaking Change** FmMultiFieldMap.MapToDtoDictionary removed
 >- FmMultiFieldMap.GetDtoDictionary added
+>- FmMultiFieldMap.MapToDtoDictionary marked as Obsolete: Use GetDtoDictionary instead
 >- `abstract class FmSyncService` Synchronize IFmObject to IFmDbObject based on FileMakerRecordId, modification date and synchronization date.
 >- FmSyncTests
 

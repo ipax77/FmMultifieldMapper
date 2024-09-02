@@ -237,6 +237,33 @@ public abstract class FmMultiFieldMap
     }
 
     /// <summary>
+    /// Maps the targetCollection to a dictionary of multifield names to their values.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="targetCollection"></param>
+    /// <param name="dtoMultiFields"></param>
+    [Obsolete ( message: "Use GetDtoDictionary instead")]
+    public static void MapToDtoDictionary<T>(ICollection<T> targetCollection, Dictionary<string, List<string>> dtoMultiFields) 
+        where T : IFmTargetMultiField, new()
+    {
+        ArgumentNullException.ThrowIfNull(targetCollection);
+        ArgumentNullException.ThrowIfNull(dtoMultiFields);
+
+        foreach (var group in targetCollection.GroupBy(g => g.FmMultiField?.Name))
+        {
+            if (string.IsNullOrEmpty(group.Key))
+            {
+                continue;
+            }
+            List<string> values = group
+                .OrderBy(o => o.Order)
+                .Select(s => s.FmMultiFieldValue?.Value ?? string.Empty)
+                .ToList();
+            dtoMultiFields[group.Key] = values;
+        }
+    }
+
+    /// <summary>
     /// Maps a dictionary of multifield names to values to the target collection.
     /// </summary>
     /// <typeparam name="T"></typeparam>
