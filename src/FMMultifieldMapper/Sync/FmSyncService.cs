@@ -2,7 +2,7 @@
 namespace FMMultiFieldMapper.Sync;
 
 /// <summary>
-/// Synchronize TFmEntities to TDbEntities based on FileMakerRecordId and modification date
+/// Synchronize IFmObject to IFmDbObject based on FileMakerRecordId, modification date and synchronization date
 /// </summary>
 /// <typeparam name="TFmEntity"></typeparam>
 /// <typeparam name="TDbEntity"></typeparam>

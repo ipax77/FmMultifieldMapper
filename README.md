@@ -143,13 +143,18 @@ Assert.IsNotNull(fmTargetTestClassWithIncludes);
 Assert.AreEqual(6, fmTargetTestClassWithIncludes.FmTargetTestClassMultifields.Count);
 
 FmTargetTestClassDto testDto = new();
-CacheFmMultiFieldMapper.MapToDtoDictionary(fmTargetTestClassWithIncludes.FmTargetTestClassMultifields,
-    testDto.FmTargetTestClassMultifields);
+testDto.FmTargetTestClassMultifields = FmMultiFieldMap
+    .GetDtoDictionary(fmTargetTestClassWithIncludes.FmTargetTestClassMultifields);
 
 Assert.AreEqual(dto.FmTargetTestClassMultifields.Count, testDto.FmTargetTestClassMultifields.Count);
 ```
 
 All samples are available in the test project located at [`.src/FMMultifieldMapperTests`](./src/FMMultifieldMapperTests).
+
+## FmSyncService
+Synchronize IFmObject to IFmDbObject based on FileMakerRecordId, modification date and synchronization date
+
+[Sample implementation](.src/FmSyncTests/TestMultiFieldSyncService.cs)
 
 ## License
 
@@ -159,3 +164,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Contributions are welcome! Please open an issue or submit a pull request. Make sure to follow the coding standards and include tests for any new features or bug fixes.
 
+## ChangeLog
+
+<details open="open"><summary>v0.2.0</summary>
+
+>- **Breaking Change** FmMultiFieldMap.MapToDtoDictionary removed
+>- FmMultiFieldMap.GetDtoDictionary added
+>- `abstract class FmSyncService` Synchronize IFmObject to IFmDbObject based on FileMakerRecordId, modification date and synchronization date.
+>- FmSyncTests
+
+</details>

@@ -6,12 +6,12 @@
     <Description>FileMaker MultiField to relational database mapper</Description>
     <PackageTags>FileMaker;MultiField;mapper</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <AssemblyVersion>0.2.0.0</AssemblyVersion>
     <Owners>Philipp Hetzner</Owners>
     <Authors>Philipp Hetzner</Authors>
-    <Version>0.1.0</Version>
-	  <FileVersion>0.1.0.0</FileVersion>
-    <PackageVersion>0.1.0</PackageVersion>
+    <Version>0.2.0</Version>
+	  <FileVersion>0.2.0.0</FileVersion>
+    <PackageVersion>0.2.0</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>    
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
