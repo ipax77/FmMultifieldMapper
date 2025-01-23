@@ -33,3 +33,26 @@ public class FmSourceTestClassSync : IFmSync
     [DataMember(Name = "AutoAndDatum")]
     public string? ModificationDate { get; set; }
 }
+
+[DataContract(Name = "TestLayout")]
+public class FmSpecialSourceTestClass : IFmObject
+{
+    [NotMapped]
+    public int FileMakerRecordId { get; set; }
+    [DataMember(Name = "Themen")]
+    [FileMakerMultiField(MultiFieldName = "Themen", IsSpecialField = true)]
+    public string? Themen { get; set; }
+    [DataMember(Name = "Name")]
+    public string? Name { get; set; }
+    [DataMember(Name = "AutoAndDatum")]
+    public string? ModificationDate { get; set; }
+}
+
+[DataContract(Name = "TestLayout")]
+public class FmSpecialSourceTestClassSync : IFmSync
+{
+    [NotMapped]
+    public int FileMakerRecordId { get; set; }
+    [DataMember(Name = "AutoAndDatum")]
+    public string? ModificationDate { get; set; }
+}

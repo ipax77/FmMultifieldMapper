@@ -71,10 +71,20 @@ public abstract class FmMultiFieldMap
                 continue;
             }
 
-            if (fmMultiFields.TryGetValue(attribute.MultiFieldName, out var values)
-                && values.Count > attribute.Order)
+            if (fmMultiFields.TryGetValue(attribute.MultiFieldName, out var values))
             {
-                property.SetValue(fmTarget, values[attribute.Order]);
+                if (attribute.IsSpecialField)
+                {
+                    property.SetValue(fmTarget, string.Join(Environment.NewLine, values) + Environment.NewLine);
+                }
+                else if (values.Count > attribute.Order)
+                {
+                    property.SetValue(fmTarget, values[attribute.Order]);
+                }
+                else
+                {
+                    property.SetValue(fmTarget, string.Empty);
+                }
             }
             else
             {
@@ -150,7 +160,7 @@ public abstract class FmMultiFieldMap
         }
     }
 
-    private static List<MultiFieldDto> GetMultiFieldDtos(object fmSource)
+    internal static List<MultiFieldDto> GetMultiFieldDtos(object fmSource)
     {
         List<MultiFieldDto> dtos = [];
         var sourceProperties = fmSource.GetType().GetProperties();
@@ -159,7 +169,22 @@ public abstract class FmMultiFieldMap
             if (prop.GetCustomAttributes(typeof(FileMakerMultiFieldAttribute), false)
                                  .FirstOrDefault() is FileMakerMultiFieldAttribute attribute)
             {
-                dtos.Add(new(attribute.MultiFieldName, prop.GetValue(fmSource)?.ToString(), attribute.Order));
+                var value = prop.GetValue(fmSource)?.ToString();
+
+                if (attribute.IsSpecialField && value != null)
+                {
+                    // Handle special fields by splitting newline-separated values
+                    var values = value.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries);
+                    for (int i = 0; i < values.Length; i++)
+                    {
+                        dtos.Add(new MultiFieldDto(attribute.MultiFieldName, values[i].Trim(), i));
+                    }
+                }
+                else
+                {
+                    // Normal multi-fields
+                    dtos.Add(new MultiFieldDto(attribute.MultiFieldName, value, attribute.Order));
+                }
             }
         }
         return dtos;
@@ -242,8 +267,8 @@ public abstract class FmMultiFieldMap
     /// <typeparam name="T"></typeparam>
     /// <param name="targetCollection"></param>
     /// <param name="dtoMultiFields"></param>
-    [Obsolete ( message: "Use GetDtoDictionary instead")]
-    public static void MapToDtoDictionary<T>(ICollection<T> targetCollection, Dictionary<string, List<string>> dtoMultiFields) 
+    [Obsolete(message: "Use GetDtoDictionary instead")]
+    public static void MapToDtoDictionary<T>(ICollection<T> targetCollection, Dictionary<string, List<string>> dtoMultiFields)
         where T : IFmTargetMultiField, new()
     {
         ArgumentNullException.ThrowIfNull(targetCollection);

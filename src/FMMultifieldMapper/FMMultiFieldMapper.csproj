@@ -1,17 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Description>FileMaker MultiField to relational database mapper</Description>
     <PackageTags>FileMaker;MultiField;mapper</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <AssemblyVersion>0.2.0.0</AssemblyVersion>
+    <AssemblyVersion>0.2.1.0</AssemblyVersion>
     <Owners>Philipp Hetzner</Owners>
     <Authors>Philipp Hetzner</Authors>
-    <Version>0.2.0</Version>
-	  <FileVersion>0.2.0.0</FileVersion>
-    <PackageVersion>0.2.0</PackageVersion>
+    <Version>0.2.1-beta</Version>
+	  <FileVersion>0.2.1.0</FileVersion>
+    <PackageVersion>0.2.1-beta</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>    
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
@@ -24,7 +24,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Nullable>enable</Nullable>
     <WarningsAsErrors>nullable</WarningsAsErrors>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>12.0</LangVersion>
       <WarningsNotAsErrors></WarningsNotAsErrors>
     <DisabledWarnings></DisabledWarnings>
     <NoWarn></NoWarn>

@@ -80,6 +80,8 @@ public class FmSourceTestClass
     [DataMember(Name = "Themen(3)")]
     [FileMakerMultiField(MultiFieldName = "Themen", Order = 2)]
     public string? Themen3 { get; set; }
+    [FileMakerMultiField(MultiFieldName = "Was", IsSpecialField = true)]
+    public string? Was { get; set; }
 }
 
 public class FmTargetTestClassMultifield : IFmTargetMultiField
@@ -100,7 +102,8 @@ var source = new FmSourceTestClass()
 {
     Themen1 = "Test3",
     Themen2 = "Test4",
-    Themen3 = "Test5"
+    Themen3 = "Test5",
+    Was = "Test1" + Environment.NewLine + "Test2" + Environment.NewLine,
 };
 
 InMemoryFmMultiFieldMapper mapper = new(_dbContext);
@@ -167,7 +170,13 @@ Contributions are welcome! Please open an issue or submit a pull request. Make s
 
 ## ChangeLog
 
-<details open="open"><summary>v0.2.0</summary>
+<details open="open"><summary>v0.2.1</summary>
+
+>- Support 'special' multi-fields (newline-separated values)
+
+</details>
+
+<details><summary>v0.2.0</summary>
 
 >- FmMultiFieldMap.GetDtoDictionary added
 >- FmMultiFieldMap.MapToDtoDictionary marked as Obsolete: Use GetDtoDictionary instead

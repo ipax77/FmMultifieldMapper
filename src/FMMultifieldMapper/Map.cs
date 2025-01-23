@@ -16,7 +16,7 @@ public static class FmMapper
         ArgumentNullException.ThrowIfNull(fmSource);
         ArgumentNullException.ThrowIfNull(targetCollection);
 
-        var multifields = GetMultiFieldDtos(fmSource);
+        var multifields = FmMultiFieldMap.GetMultiFieldDtos(fmSource);
         var existingEntries = targetCollection.ToList();
 
         foreach (var multifield in multifields)
@@ -51,21 +51,6 @@ public static class FmMapper
         {
             targetCollection.Remove(entry);
         }
-    }
-
-    private static List<MultiFieldDto> GetMultiFieldDtos(object fmSource)
-    {
-        List<MultiFieldDto> dtos = [];
-        var sourceProperties = fmSource.GetType().GetProperties();
-        foreach (var prop in sourceProperties)
-        {
-            if (prop.GetCustomAttributes(typeof(FileMakerMultiFieldAttribute), false)
-                                 .FirstOrDefault() is FileMakerMultiFieldAttribute attribute)
-            {
-                dtos.Add(new(attribute.MultiFieldName, prop.GetValue(fmSource)?.ToString(), attribute.Order));
-            }
-        }
-        return dtos;
     }
 }
 

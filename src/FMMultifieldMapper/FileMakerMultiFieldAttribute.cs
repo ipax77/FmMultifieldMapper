@@ -14,4 +14,9 @@ public sealed class FileMakerMultiFieldAttribute : Attribute
     /// Order - start with 0
     /// </summary>
     public int Order { get; set; }
+
+    /// <summary>
+    /// Indicates if the property is a special multi-field (newline-separated values).
+    /// </summary>
+    public bool IsSpecialField { get; set; }
 }
