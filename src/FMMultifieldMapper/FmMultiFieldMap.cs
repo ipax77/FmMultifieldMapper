@@ -174,7 +174,7 @@ public abstract class FmMultiFieldMap
                 if (attribute.IsSpecialField && value != null)
                 {
                     // Handle special fields by splitting newline-separated values
-                    var values = value.Split(["\r\n"], StringSplitOptions.RemoveEmptyEntries);
+                    var values = value.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
                     for (int i = 0; i < values.Length; i++)
                     {
                         dtos.Add(new MultiFieldDto(attribute.MultiFieldName, values[i].Trim(), i));
