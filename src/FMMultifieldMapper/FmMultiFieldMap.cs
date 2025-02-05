@@ -75,7 +75,7 @@ public abstract class FmMultiFieldMap
             {
                 if (attribute.IsSpecialField)
                 {
-                    property.SetValue(fmTarget, string.Join(Environment.NewLine, values) + Environment.NewLine);
+                    property.SetValue(fmTarget, string.Join("\r\n", values) + "\r\n");
                 }
                 else if (values.Count > attribute.Order)
                 {
@@ -174,7 +174,7 @@ public abstract class FmMultiFieldMap
                 if (attribute.IsSpecialField && value != null)
                 {
                     // Handle special fields by splitting newline-separated values
-                    var values = value.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries);
+                    var values = value.Split(["\r\n"], StringSplitOptions.RemoveEmptyEntries);
                     for (int i = 0; i < values.Length; i++)
                     {
                         dtos.Add(new MultiFieldDto(attribute.MultiFieldName, values[i].Trim(), i));

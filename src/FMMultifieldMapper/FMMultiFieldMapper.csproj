@@ -9,9 +9,9 @@
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
     <Owners>Philipp Hetzner</Owners>
     <Authors>Philipp Hetzner</Authors>
-    <Version>0.2.1-beta</Version>
+    <Version>0.2.1-beta2</Version>
 	  <FileVersion>0.2.1.0</FileVersion>
-    <PackageVersion>0.2.1-beta</PackageVersion>
+    <PackageVersion>0.2.1-beta2</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>    
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>

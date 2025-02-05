@@ -53,7 +53,7 @@ public class SyncSpecialMultiFieldTests
             {
                 FileMakerRecordId = 1,
                 Name = "Test",
-                Themen = "Test1" + Environment.NewLine + "Test2" + Environment.NewLine + "Test3" + Environment.NewLine,
+                Themen = "Test1" + "\r\n" + "Test2" + "\r\n" + "Test3" + "\r\n",
                 ModificationDate = "01/01/2020"
             });
 
@@ -106,7 +106,7 @@ public class SyncSpecialMultiFieldTests
             {
                 FileMakerRecordId = 1,
                 Name = "UpdatedName",
-                Themen = "Test1" + Environment.NewLine + "Test2" + Environment.NewLine + "Test3" + Environment.NewLine,
+                Themen = "Test1" + "\r\n" + "Test2" + "\r\n" + "Test3" + "\r\n",
                 ModificationDate = "02/01/2020"
             });
 
@@ -168,7 +168,7 @@ public class SyncSpecialMultiFieldTests
         {
             FileMakerRecordId = 1,
             Name = "UpdatedName",
-            Themen = "Test1" + Environment.NewLine + "Test2" + Environment.NewLine + "Test3" + Environment.NewLine,
+            Themen = "Test1" + "\r\n" + "Test2" + "\r\n" + "Test3" + "\r\n",
             ModificationDate = "02/01/2020"
         };
 

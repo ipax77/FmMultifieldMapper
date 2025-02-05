@@ -23,7 +23,7 @@ public partial class SpecialMultiFieldsTests
     {
         var source = new FmSpecialSourceTestClass()
         {
-            Themen = "Test1" + Environment.NewLine + "Test2" + Environment.NewLine + "Test3" + Environment.NewLine,
+            Themen = "Test1" + "\r\n" + "Test2" + "\r\n" + "Test3" + "\r\n",
         };
         var target = new FmTargetTestClass();
 
@@ -50,7 +50,7 @@ public partial class SpecialMultiFieldsTests
 
         CacheFmMultiFieldMapper.MapToFmObject(dto.FmTargetTestClassMultifields, fmTarget);
 
-        Assert.AreEqual("Test1" + Environment.NewLine + "Test2" + Environment.NewLine, fmTarget.Themen);
+        Assert.AreEqual("Test1" + "\r\n" + "Test2" + "\r\n", fmTarget.Themen);
     }
 
     [TestMethod]
@@ -62,7 +62,7 @@ public partial class SpecialMultiFieldsTests
 
         var source = new FmSpecialSourceTestClass()
         {
-            Themen = "Test1" + Environment.NewLine + "Test2" + Environment.NewLine + "Test3" + Environment.NewLine,
+            Themen = "Test1" + "\r\n" + "Test2" + "\r\n" + "Test3" + "\r\n",
         };
 
         InMemoryFmMultiFieldMapper mapper = new(_dbContext);
