@@ -7,6 +7,8 @@ This library maps data between [FileMaker](https://www.claris.com/)-based DTO ob
 
 ## Installation
 
+Version `0.3.0-beta1` and later require .NET 10.
+
 You can install the library via NuGet:
 ```
 dotnet add package FMMultiFieldMapper
@@ -60,6 +62,15 @@ internal class InMemoryFmMultiFieldMapper(TestContext context) : FmMultiFieldMap
     }
 }
 ```
+
+The singular methods remain the only required overrides. For database-backed mappers, you can additionally override
+`GetOrCreateMultiFieldIds` and `GetOrCreateMultiFieldValueIds` to resolve each mapping batch with set-based queries.
+The default implementations deduplicate their inputs and call the singular methods, so existing mapper
+implementations remain source-compatible.
+
+The EF Core mapper in [`InMemoryFmMultifieldMapper.cs`](./src/FMMultifieldMapperTests/InMemoryFmMultifieldMapper.cs)
+shows the batching pattern: load existing names or values in one query, add missing entities, and call
+`SaveChangesAsync` once per resolution stage. The core package does not depend on EF Core.
 
 ### Mapping FileMaker Objects to Relational Database Objects
 
@@ -153,12 +164,12 @@ testDto.FmTargetTestClassMultifields = FmMultiFieldMap
 Assert.AreEqual(dto.FmTargetTestClassMultifields.Count, testDto.FmTargetTestClassMultifields.Count);
 ```
 
-All samples are available in the test project located at [`.src/FMMultifieldMapperTests`](./src/FMMultifieldMapperTests).
+All samples are available in the test project located at [`src/FMMultifieldMapperTests`](./src/FMMultifieldMapperTests).
 
 ## FmSyncService
 Synchronize IFmObject to IFmDbObject based on FileMakerRecordId, modification date and synchronization date
 
-[Sample implementation](.src/FmSyncTests/TestMultiFieldSyncService.cs)
+[Sample implementation](./src/FmSyncTests/TestMultiFieldSyncService.cs)
 
 ## License
 

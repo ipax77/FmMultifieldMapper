@@ -57,11 +57,13 @@ public class SyncTests
 
         TestSyncService syncService = new(_dbContext, mockFmClient.Object);
 
-        await syncService.Sync();
+        var result = await syncService.Sync();
 
         var dbEntity = _dbContext.FmTargetTestClasses.FirstOrDefault(f => f.FileMakerRecordId == 1);
         Assert.IsNotNull(dbEntity);
         Assert.AreEqual("Test", dbEntity.Name);
+        Assert.AreEqual(1, result.Created);
+        Assert.AreEqual(0, result.Errors);
     }
 
     [TestMethod]
@@ -106,13 +108,15 @@ public class SyncTests
         TestSyncService syncService = new(_dbContext, mockFmClient.Object);
 
         // Act
-        await syncService.Sync();
+        var result = await syncService.Sync();
 
         // Assert
         var dbEntity = _dbContext.FmTargetTestClasses.FirstOrDefault(f => f.FileMakerRecordId == 1);
         Assert.IsNotNull(dbEntity);
         Assert.AreEqual("UpdatedName", dbEntity.Name); // Verify that the name was updated
         Assert.AreEqual(new DateTime(2020, 2, 1), dbEntity.ModificationTime); // Verify that the SyncTime was updated
+        Assert.AreEqual(1, result.Updated);
+        Assert.AreEqual(0, result.Errors);
     }
 
     [TestMethod]
@@ -140,11 +144,13 @@ public class SyncTests
         TestSyncService syncService = new(_dbContext, mockFmClient.Object);
 
         // Act
-        await syncService.Sync();
+        var result = await syncService.Sync();
 
         // Assert
         var dbEntity = _dbContext.FmTargetTestClasses.FirstOrDefault(f => f.FileMakerRecordId == 1);
         Assert.IsNull(dbEntity); // Verify that the entity was deleted
+        Assert.AreEqual(1, result.Deleted);
+        Assert.AreEqual(0, result.Errors);
     }
 
     [TestMethod]
@@ -179,13 +185,15 @@ public class SyncTests
         TestSyncService syncService = new(_dbContext, mockFmClient.Object);
 
         // Act
-        await syncService.Sync();
+        var result = await syncService.Sync();
 
         // Assert
         var dbEntity = _dbContext.FmTargetTestClasses.FirstOrDefault(f => f.FileMakerRecordId == 1);
         Assert.IsNotNull(dbEntity);
         Assert.AreEqual("UpToDate", dbEntity.Name); // Verify that the name wasn't changed
         Assert.AreEqual(new DateTime(2020, 2, 1), dbEntity.SyncTime); // Verify that the SyncTime wasn't changed
+        Assert.AreEqual(1, result.UpToDate);
+        Assert.AreEqual(0, result.Errors);
     }
 
 }

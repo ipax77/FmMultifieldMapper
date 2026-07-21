@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FMMultifieldMapper/FMMultiFieldMapper.csproj" />
+    <Project Path="src/FMMultifieldMapperTests/FMMultifieldMapperTests.csproj" />
+    <Project Path="src/FmSyncTests/FmSyncTests.csproj" />
+  </Folder>
+</Solution>

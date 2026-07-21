@@ -27,11 +27,14 @@ public abstract class FmSyncService<TFmEntity, TDbEntity, TFmSyncEntity>
         var fmSyncs = await GetFmSyncs<TFmSyncEntity>(token).ConfigureAwait(false);
         var dbSyncsDict = (await GetDbSyncs<TDbEntity>(token).ConfigureAwait(false))
             .ToDictionary(k => k.FileMakerRecordId, v => v.SyncTime);
+        HashSet<int> toDeleteIds = [.. dbSyncsDict.Keys];
 
         SyncResult = new();
 
         foreach (var fmSync in fmSyncs)
         {
+            toDeleteIds.Remove(fmSync.FileMakerRecordId);
+
             if (dbSyncsDict.TryGetValue(fmSync.FileMakerRecordId, out DateTime dbSyncTime))
             {
                 if (fmSync.ModificationDate > dbSyncTime)
@@ -63,7 +66,6 @@ public abstract class FmSyncService<TFmEntity, TDbEntity, TFmSyncEntity>
             }
         }
 
-        var toDeleteIds = dbSyncsDict.Keys.Except(fmSyncs.Select(s => s.FileMakerRecordId)).ToList();
         var deleted = await DeleteEntities(toDeleteIds, token)
             .ConfigureAwait(false);
 

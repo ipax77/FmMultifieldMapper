@@ -1,4 +1,6 @@
-﻿using FMMultiFieldMapper.Sync;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using FMMultiFieldMapper.Sync;
 
 namespace FMMultiFieldMapper;
 
@@ -7,6 +9,8 @@ namespace FMMultiFieldMapper;
 /// </summary>
 public abstract class FmMultiFieldMap
 {
+    private static readonly ConditionalWeakTable<Type, MultiFieldPropertyMetadata[]> PropertyMetadataCache = new();
+
     /// <summary>
     /// GetOrCreateMultiFieldId
     /// </summary>
@@ -20,6 +24,52 @@ public abstract class FmMultiFieldMap
     /// <param name="value">MultiFieldValue value</param>
     /// <returns></returns>
     public abstract Task<int> GetOrCreateMultiFieldValueId(int multifieldId, string value);
+
+    /// <summary>
+    /// Resolves IDs for a batch of multi-field names. Override this method to use a set-based data store operation.
+    /// </summary>
+    /// <param name="names">The distinct multi-field names to resolve.</param>
+    /// <returns>IDs keyed by multi-field name.</returns>
+    protected virtual async Task<IReadOnlyDictionary<string, int>> GetOrCreateMultiFieldIds(
+        IReadOnlyCollection<string> names)
+    {
+        ArgumentNullException.ThrowIfNull(names);
+
+        var ids = new Dictionary<string, int>(names.Count, StringComparer.Ordinal);
+        foreach (var name in names)
+        {
+            if (!ids.ContainsKey(name))
+            {
+                ids.Add(name, await GetOrCreateMultiFieldId(name).ConfigureAwait(false));
+            }
+        }
+
+        return ids;
+    }
+
+    /// <summary>
+    /// Resolves IDs for a batch of multi-field values. Override this method to use a set-based data store operation.
+    /// </summary>
+    /// <param name="values">The distinct multi-field ID and value pairs to resolve.</param>
+    /// <returns>IDs keyed by multi-field ID and value.</returns>
+    protected virtual async Task<IReadOnlyDictionary<(int MultiFieldId, string Value), int>> GetOrCreateMultiFieldValueIds(
+        IReadOnlyCollection<(int MultiFieldId, string Value)> values)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+
+        var ids = new Dictionary<(int MultiFieldId, string Value), int>(values.Count);
+        foreach (var value in values)
+        {
+            if (!ids.ContainsKey(value))
+            {
+                ids.Add(
+                    value,
+                    await GetOrCreateMultiFieldValueId(value.MultiFieldId, value.Value).ConfigureAwait(false));
+            }
+        }
+
+        return ids;
+    }
 
     /// <summary>
     /// Map sourceCollection to fmObject FmMultiField attribute properties
@@ -58,18 +108,10 @@ public abstract class FmMultiFieldMap
         ArgumentNullException.ThrowIfNull(fmMultiFields);
         ArgumentNullException.ThrowIfNull(fmTarget);
 
-        var targetProperties = fmTarget.GetType().GetProperties();
-
-        foreach (var property in targetProperties)
+        foreach (var metadata in GetMultiFieldPropertyMetadata(fmTarget.GetType()))
         {
-            var attribute = (FileMakerMultiFieldAttribute?)property
-                .GetCustomAttributes(typeof(FileMakerMultiFieldAttribute), false)
-                .FirstOrDefault();
-
-            if (attribute == null)
-            {
-                continue;
-            }
+            var property = metadata.Property;
+            var attribute = metadata.Attribute;
 
             if (fmMultiFields.TryGetValue(attribute.MultiFieldName, out var values))
             {
@@ -111,47 +153,79 @@ public abstract class FmMultiFieldMap
     private async Task MapMultiFields<T>(List<MultiFieldDto> targetMultiFields, ICollection<T> targetCollection)
         where T : IFmTargetMultiField, new()
     {
-        var existingEntries = targetCollection.ToList();
-
-        foreach (var multifieldGroup in targetMultiFields.GroupBy(g => g.Name))
+        HashSet<T> existingEntries = [.. targetCollection];
+        var existingByKey = new Dictionary<MultiFieldKey, T>();
+        foreach (var entry in targetCollection)
         {
-            var multifieldName = multifieldGroup.First().Name;
-            var multifieldId = await GetOrCreateMultiFieldId(multifieldName)
-                .ConfigureAwait(false);
-
-            foreach (var targetMultiField in multifieldGroup)
+            if (entry.FmMultiField is not null && entry.FmMultiFieldValue is not null)
             {
-                if (targetMultiField is null || string.IsNullOrEmpty(targetMultiField.Value))
-                {
-                    continue;
-                }
+                existingByKey.TryAdd(
+                    new MultiFieldKey(entry.FmMultiField.Name, entry.FmMultiFieldValue.Value),
+                    entry);
+            }
+        }
 
-                var multifieldValue = targetMultiField.Value;
-                var multifieldValueId = await GetOrCreateMultiFieldValueId(multifieldId, multifieldValue)
-                        .ConfigureAwait(false);
+        var distinctNames = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var targetMultiField in targetMultiFields)
+        {
+            distinctNames.Add(targetMultiField.Name);
+        }
 
-                var existingMultiField = targetCollection
-                    .FirstOrDefault(m => m.FmMultiField?.Name == targetMultiField.Name
-                        && m.FmMultiFieldValue?.Value == targetMultiField.Value);
+        var multiFieldIds = await GetOrCreateMultiFieldIds(distinctNames).ConfigureAwait(false);
+        foreach (var name in distinctNames)
+        {
+            if (!multiFieldIds.ContainsKey(name))
+            {
+                throw new InvalidOperationException(
+                    $"The bulk multi-field resolver did not return an ID for name '{name}'.");
+            }
+        }
 
-                if (existingMultiField is not null)
-                {
-                    ArgumentNullException.ThrowIfNull(existingMultiField.FmMultiField);
-                    ArgumentNullException.ThrowIfNull(existingMultiField.FmMultiFieldValue);
-                    existingMultiField.Order = targetMultiField.Order;
-                    existingEntries.Remove(existingMultiField);
-                }
-                else
-                {
-                    T fmTargetMultiField = new()
-                    {
-                        FmMultiFieldId = multifieldId,
-                        FmMultiFieldValueId = multifieldValueId
-                    };
-                    targetCollection.Add(fmTargetMultiField);
-                }
+        var distinctValues = new HashSet<(int MultiFieldId, string Value)>();
+        foreach (var targetMultiField in targetMultiFields)
+        {
+            if (!string.IsNullOrEmpty(targetMultiField.Value))
+            {
+                distinctValues.Add((multiFieldIds[targetMultiField.Name], targetMultiField.Value));
+            }
+        }
+
+        var multiFieldValueIds = await GetOrCreateMultiFieldValueIds(distinctValues).ConfigureAwait(false);
+        foreach (var value in distinctValues)
+        {
+            if (!multiFieldValueIds.ContainsKey(value))
+            {
+                throw new InvalidOperationException(
+                    $"The bulk multi-field value resolver did not return an ID for multi-field ID " +
+                    $"'{value.MultiFieldId}' and value '{value.Value}'.");
+            }
+        }
+
+        foreach (var targetMultiField in targetMultiFields)
+        {
+            if (string.IsNullOrEmpty(targetMultiField.Value))
+            {
+                continue;
             }
 
+            var multifieldId = multiFieldIds[targetMultiField.Name];
+            var multifieldValueId = multiFieldValueIds[(multifieldId, targetMultiField.Value)];
+            var key = new MultiFieldKey(targetMultiField.Name, targetMultiField.Value);
+
+            if (existingByKey.TryGetValue(key, out var existingMultiField))
+            {
+                existingMultiField.Order = targetMultiField.Order;
+                existingEntries.Remove(existingMultiField);
+            }
+            else
+            {
+                T fmTargetMultiField = new()
+                {
+                    FmMultiFieldId = multifieldId,
+                    FmMultiFieldValueId = multifieldValueId
+                };
+                targetCollection.Add(fmTargetMultiField);
+            }
         }
 
         foreach (var entry in existingEntries)
@@ -163,28 +237,24 @@ public abstract class FmMultiFieldMap
     internal static List<MultiFieldDto> GetMultiFieldDtos(object fmSource)
     {
         List<MultiFieldDto> dtos = [];
-        var sourceProperties = fmSource.GetType().GetProperties();
-        foreach (var prop in sourceProperties)
+        foreach (var metadata in GetMultiFieldPropertyMetadata(fmSource.GetType()))
         {
-            if (prop.GetCustomAttributes(typeof(FileMakerMultiFieldAttribute), false)
-                                 .FirstOrDefault() is FileMakerMultiFieldAttribute attribute)
-            {
-                var value = prop.GetValue(fmSource)?.ToString();
+            var value = metadata.Property.GetValue(fmSource)?.ToString();
+            var attribute = metadata.Attribute;
 
-                if (attribute.IsSpecialField && value != null)
+            if (attribute.IsSpecialField && value != null)
+            {
+                // Handle special fields by splitting newline-separated values
+                var values = value.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < values.Length; i++)
                 {
-                    // Handle special fields by splitting newline-separated values
-                    var values = value.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
-                    for (int i = 0; i < values.Length; i++)
-                    {
-                        dtos.Add(new MultiFieldDto(attribute.MultiFieldName, values[i].Trim(), i));
-                    }
+                    dtos.Add(new MultiFieldDto(attribute.MultiFieldName, values[i].Trim(), i));
                 }
-                else
-                {
-                    // Normal multi-fields
-                    dtos.Add(new MultiFieldDto(attribute.MultiFieldName, value, attribute.Order));
-                }
+            }
+            else
+            {
+                // Normal multi-fields
+                dtos.Add(new MultiFieldDto(attribute.MultiFieldName, value, attribute.Order));
             }
         }
         return dtos;
@@ -314,33 +384,23 @@ public abstract class FmMultiFieldMap
     {
         ArgumentNullException.ThrowIfNull(fmTarget);
 
-        var targetProperties = fmTarget.GetType().GetProperties();
-        var multifieldAttributes = targetProperties
-            .Select(prop => new
-            {
-                Property = prop,
-                Attribute = (FileMakerMultiFieldAttribute?)prop
-                    .GetCustomAttributes(typeof(FileMakerMultiFieldAttribute), false)
-                    .FirstOrDefault()
-            })
-            .Where(x => x.Attribute != null)
-            .ToList();
+        var multifieldAttributes = GetMultiFieldPropertyMetadata(fmTarget.GetType());
 
         // Ensure there is at least one FileMakerMultiFieldAttribute
-        if (multifieldAttributes.Count == 0)
+        if (multifieldAttributes.Length == 0)
         {
             throw new InvalidOperationException("The target object does not contain any properties with the FileMakerMultiFieldAttribute.");
         }
 
         // Group by MultiFieldName and check the Order consistency
         var groupedAttributes = multifieldAttributes
-            .GroupBy(x => x.Attribute!.MultiFieldName)
+            .GroupBy(x => x.Attribute.MultiFieldName)
             .ToList();
 
         foreach (var group in groupedAttributes)
         {
             var orders = group
-                .Select(x => x.Attribute!.Order)
+                .Select(x => x.Attribute.Order)
                 .OrderBy(order => order)
                 .ToList();
 
@@ -354,4 +414,28 @@ public abstract class FmMultiFieldMap
             }
         }
     }
+
+    private static MultiFieldPropertyMetadata[] GetMultiFieldPropertyMetadata(Type type)
+    {
+        return PropertyMetadataCache.GetValue(type, static objectType =>
+        {
+            var metadata = new List<MultiFieldPropertyMetadata>();
+            foreach (var property in objectType.GetProperties())
+            {
+                var attribute = property.GetCustomAttribute<FileMakerMultiFieldAttribute>(inherit: false);
+                if (attribute is not null)
+                {
+                    metadata.Add(new MultiFieldPropertyMetadata(property, attribute));
+                }
+            }
+
+            return [.. metadata];
+        });
+    }
 }
+
+internal sealed record MultiFieldPropertyMetadata(
+    PropertyInfo Property,
+    FileMakerMultiFieldAttribute Attribute);
+
+internal readonly record struct MultiFieldKey(string Name, string Value);

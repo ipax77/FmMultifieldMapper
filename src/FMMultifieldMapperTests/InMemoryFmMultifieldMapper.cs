@@ -42,6 +42,70 @@ public class InMemoryFmMultiFieldMapper(DbTestContext context) : FmMultiFieldMap
         }
         return id;
     }
+
+    protected override async Task<IReadOnlyDictionary<string, int>> GetOrCreateMultiFieldIds(
+        IReadOnlyCollection<string> names)
+    {
+        var distinctNames = names.ToHashSet(StringComparer.Ordinal);
+        var entities = (await context.Multifields
+                .Where(x => distinctNames.Contains(x.Name))
+                .ToListAsync())
+            .ToDictionary(x => x.Name, StringComparer.Ordinal);
+
+        var hasNewEntities = false;
+        foreach (var name in distinctNames)
+        {
+            if (!entities.ContainsKey(name))
+            {
+                var entity = new FmMultiField { Name = name };
+                context.Multifields.Add(entity);
+                entities.Add(name, entity);
+                hasNewEntities = true;
+            }
+        }
+
+        if (hasNewEntities)
+        {
+            await context.SaveChangesAsync();
+        }
+
+        return entities.ToDictionary(x => x.Key, x => x.Value.FmMultiFieldId, StringComparer.Ordinal);
+    }
+
+    protected override async Task<IReadOnlyDictionary<(int MultiFieldId, string Value), int>>
+        GetOrCreateMultiFieldValueIds(IReadOnlyCollection<(int MultiFieldId, string Value)> values)
+    {
+        var distinctValues = values.ToHashSet();
+        var multiFieldIds = distinctValues.Select(x => x.MultiFieldId).ToHashSet();
+        var entities = (await context.MultifieldValues
+                .Where(x => multiFieldIds.Contains(x.FmMultiFieldId))
+                .ToListAsync())
+            .Where(x => distinctValues.Contains((x.FmMultiFieldId, x.Value)))
+            .ToDictionary(x => (x.FmMultiFieldId, x.Value));
+
+        var hasNewEntities = false;
+        foreach (var value in distinctValues)
+        {
+            if (!entities.ContainsKey(value))
+            {
+                var entity = new FmMultiFieldValue
+                {
+                    FmMultiFieldId = value.MultiFieldId,
+                    Value = value.Value
+                };
+                context.MultifieldValues.Add(entity);
+                entities.Add(value, entity);
+                hasNewEntities = true;
+            }
+        }
+
+        if (hasNewEntities)
+        {
+            await context.SaveChangesAsync();
+        }
+
+        return entities.ToDictionary(x => x.Key, x => x.Value.FmMultiFieldValueId);
+    }
 }
 
 public class CacheFmMultiFieldMapper(DbTestContext context) : FmMultiFieldMap

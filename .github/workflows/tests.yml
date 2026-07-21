@@ -2,14 +2,23 @@ name: build and test
 
 on:
   push:
+    paths:
+    - '**.cs'
+    - '**.csproj'
+    - 'FMMultifieldMapper.slnx'
+    - 'global.json'
+    - '.github/workflows/tests.yml'
   pull_request:
     branches: [ main ]
     paths:
     - '**.cs'
     - '**.csproj'
+    - 'FMMultifieldMapper.slnx'
+    - 'global.json'
+    - '.github/workflows/tests.yml'
 
 env:
-  DOTNET_VERSION: '8.0.x'
+  DOTNET_VERSION: '10.0.x'
 
 jobs:
   build-and-test:
@@ -19,29 +28,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
     - uses: actions/checkout@v4
-    - name: Setup .NET Core
+    - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Install dependencies for FMMultifieldMapperTests
-      run: dotnet restore ./src/FMMultifieldMapperTests/FMMultifieldMapperTests.csproj
+    - name: Restore
+      run: dotnet restore FMMultifieldMapper.slnx
 
-    - name: Build FMMultifieldMapperTests
-      run: dotnet build --configuration Release --no-restore ./src/FMMultifieldMapperTests/FMMultifieldMapperTests.csproj
-    
-    - name: Test FMMultifieldMapperTests
-      run: dotnet test --no-restore --verbosity normal ./src/FMMultifieldMapperTests/FMMultifieldMapperTests.csproj
+    - name: Build
+      run: dotnet build FMMultifieldMapper.slnx --configuration Release --no-restore
 
-    - name: Install dependencies for FmSyncTests
-      run: dotnet restore ./src/FmSyncTests/FmSyncTests.csproj
-
-    - name: Build FmSyncTests
-      run: dotnet build --configuration Release --no-restore ./src/FmSyncTests/FmSyncTests.csproj
-    
-    - name: Test FmSyncTests
-      run: dotnet test --no-restore --verbosity normal ./src/FmSyncTests/FmSyncTests.csproj
+    - name: Test
+      run: dotnet test FMMultifieldMapper.slnx --configuration Release --no-restore --no-build --verbosity normal
