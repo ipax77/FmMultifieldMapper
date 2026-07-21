@@ -69,4 +69,20 @@ public partial class MapTests
             .FirstOrDefault(f => f.FmMultiField?.Name == "ObsoleteThemen");
         Assert.IsNull(removedItem);
     }
+
+    [TestMethod]
+    public void Map_WithRepeatedValue_ReusesTheExistingEntryAndKeepsLastOrder()
+    {
+        var source = new FmSourceTestClass
+        {
+            Themen1 = "Repeated",
+            Themen2 = "Repeated"
+        };
+        var targetCollection = new List<FmTargetTestClassMultifield>();
+
+        FmMapper.Map(source, targetCollection);
+
+        Assert.HasCount(1, targetCollection);
+        Assert.AreEqual(1, targetCollection[0].Order);
+    }
 }

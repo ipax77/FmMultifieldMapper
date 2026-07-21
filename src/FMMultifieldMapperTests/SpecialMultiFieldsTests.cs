@@ -36,6 +36,24 @@ public partial class SpecialMultiFieldsTests
     }
 
     [TestMethod]
+    public void MapFmToDtoTest_SupportsMixedNewlineSequences()
+    {
+        var source = new FmSpecialSourceTestClass
+        {
+            Themen = "Test1\r\nTest2\rTest3\nTest4"
+        };
+        var target = new FmTargetTestClass();
+
+        FmMapper.Map(source, target.FmTargetTestClassMultifields);
+
+        var values = target.FmTargetTestClassMultifields
+            .OrderBy(x => x.Order)
+            .Select(x => x.FmMultiFieldValue?.Value)
+            .ToList();
+        CollectionAssert.AreEqual(new[] { "Test1", "Test2", "Test3", "Test4" }, values);
+    }
+
+    [TestMethod]
     public void MapDtoToFMTest()
     {
         FmTargetTestClassDto dto = new()

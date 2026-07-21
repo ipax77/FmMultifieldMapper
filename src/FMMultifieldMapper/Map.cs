@@ -17,7 +17,17 @@ public static class FmMapper
         ArgumentNullException.ThrowIfNull(targetCollection);
 
         var multifields = FmMultiFieldMap.GetMultiFieldDtos(fmSource);
-        var existingEntries = targetCollection.ToList();
+        HashSet<T> existingEntries = [.. targetCollection];
+        var existingByKey = new Dictionary<MultiFieldKey, T>();
+        foreach (var entry in targetCollection)
+        {
+            if (entry.FmMultiField is not null && entry.FmMultiFieldValue is not null)
+            {
+                existingByKey.TryAdd(
+                    new MultiFieldKey(entry.FmMultiField.Name, entry.FmMultiFieldValue.Value),
+                    entry);
+            }
+        }
 
         foreach (var multifield in multifields)
         {
@@ -25,14 +35,10 @@ public static class FmMapper
             {
                 continue;
             }
-            var existingMultiField = targetCollection
-                .FirstOrDefault(m => m.FmMultiField?.Name == multifield.Name
-                    && m.FmMultiFieldValue?.Value == multifield.Value);
+            var key = new MultiFieldKey(multifield.Name, multifield.Value);
 
-            if (existingMultiField is not null)
+            if (existingByKey.TryGetValue(key, out var existingMultiField))
             {
-                ArgumentNullException.ThrowIfNull(existingMultiField.FmMultiField);
-                ArgumentNullException.ThrowIfNull(existingMultiField.FmMultiFieldValue);
                 existingMultiField.Order = multifield.Order;
                 existingEntries.Remove(existingMultiField);
             }
@@ -45,6 +51,7 @@ public static class FmMapper
                 };
 
                 targetCollection.Add(fmTargetMultiField);
+                existingByKey.TryAdd(key, fmTargetMultiField);
             }
         }
         foreach (var entry in existingEntries)
