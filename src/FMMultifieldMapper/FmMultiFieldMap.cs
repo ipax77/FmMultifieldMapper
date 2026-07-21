@@ -222,7 +222,8 @@ public abstract class FmMultiFieldMap
                 T fmTargetMultiField = new()
                 {
                     FmMultiFieldId = multifieldId,
-                    FmMultiFieldValueId = multifieldValueId
+                    FmMultiFieldValueId = multifieldValueId,
+                    Order = targetMultiField.Order
                 };
                 targetCollection.Add(fmTargetMultiField);
             }
@@ -269,7 +270,7 @@ public abstract class FmMultiFieldMap
             var name = ent.Key;
             for (int i = 0; i < ent.Value.Count; i++)
             {
-                dtos.Add(new(name, ent.Value[i], i + 1));
+                dtos.Add(new(name, ent.Value[i], i));
             }
         }
 

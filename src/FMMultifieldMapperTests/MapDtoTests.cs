@@ -106,5 +106,36 @@ public class MapStoTests
             Assert.IsTrue(testDto.FmTargetTestClassMultifields.ContainsKey(key));
             CollectionAssert.AreEqual(dto.FmTargetTestClassMultifields[key], testDto.FmTargetTestClassMultifields[key]);
         }
+
+        foreach (var group in fmTargetTestClassWithIncludes.FmTargetTestClassMultifields.GroupBy(x => x.FmMultiField!.Name))
+        {
+            CollectionAssert.AreEqual(
+                Enumerable.Range(0, group.Count()).ToArray(),
+                group.OrderBy(x => x.Order).Select(x => x.Order).ToArray());
+        }
+    }
+
+    [TestMethod]
+    public async Task MapFromDtoDictionary_ReordersExistingEntries_AndUsesZeroBasedOrder()
+    {
+        var target = _dbContext.FmTargetTestClasses
+            .Include(x => x.FmTargetTestClassMultifields)
+                .ThenInclude(x => x.FmMultiField)
+            .Include(x => x.FmTargetTestClassMultifields)
+                .ThenInclude(x => x.FmMultiFieldValue)
+            .Single();
+        var mapper = new CacheFmMultiFieldMapper(_dbContext);
+
+        await mapper.MapFromDtoDictionary(
+            new Dictionary<string, List<string>> { ["Themen"] = ["Test3", "Test1"] },
+            target.FmTargetTestClassMultifields);
+        await _dbContext.SaveChangesAsync();
+
+        var ordered = target.FmTargetTestClassMultifields.OrderBy(x => x.Order).ToArray();
+        Assert.HasCount(2, ordered);
+        Assert.AreEqual("Test3", ordered[0].FmMultiFieldValue!.Value);
+        Assert.AreEqual(0, ordered[0].Order);
+        Assert.AreEqual("Test1", ordered[1].FmMultiFieldValue!.Value);
+        Assert.AreEqual(1, ordered[1].Order);
     }
 }
