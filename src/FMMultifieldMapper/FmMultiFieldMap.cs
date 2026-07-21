@@ -154,14 +154,18 @@ public abstract class FmMultiFieldMap
         where T : IFmTargetMultiField, new()
     {
         HashSet<T> existingEntries = [.. targetCollection];
-        var existingByKey = new Dictionary<MultiFieldKey, T>();
-        foreach (var entry in targetCollection)
+        var existingByKey = new Dictionary<MultiFieldKey, Queue<T>>();
+        foreach (var entry in targetCollection.OrderBy(x => x.Order))
         {
             if (entry.FmMultiField is not null && entry.FmMultiFieldValue is not null)
             {
-                existingByKey.TryAdd(
-                    new MultiFieldKey(entry.FmMultiField.Name, entry.FmMultiFieldValue.Value),
-                    entry);
+                var key = new MultiFieldKey(entry.FmMultiField.Name, entry.FmMultiFieldValue.Value);
+                if (!existingByKey.TryGetValue(key, out var entries))
+                {
+                    entries = new Queue<T>();
+                    existingByKey[key] = entries;
+                }
+                entries.Enqueue(entry);
             }
         }
 
@@ -212,8 +216,10 @@ public abstract class FmMultiFieldMap
             var multifieldValueId = multiFieldValueIds[(multifieldId, targetMultiField.Value)];
             var key = new MultiFieldKey(targetMultiField.Name, targetMultiField.Value);
 
-            if (existingByKey.TryGetValue(key, out var existingMultiField))
+            if (existingByKey.TryGetValue(key, out var existingMultiFields)
+                && existingMultiFields.Count > 0)
             {
+                var existingMultiField = existingMultiFields.Dequeue();
                 existingMultiField.Order = targetMultiField.Order;
                 existingEntries.Remove(existingMultiField);
             }

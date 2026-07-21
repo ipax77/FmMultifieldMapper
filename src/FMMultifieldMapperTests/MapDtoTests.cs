@@ -138,4 +138,49 @@ public class MapStoTests
         Assert.AreEqual("Test1", ordered[1].FmMultiFieldValue!.Value);
         Assert.AreEqual(1, ordered[1].Order);
     }
+
+    [TestMethod]
+    public async Task MapFromDtoDictionary_PreservesRepeatedExistingValuesAndTheirOrder()
+    {
+        var mapper = new CacheFmMultiFieldMapper(_dbContext);
+        var target = _dbContext.FmTargetTestClasses
+            .Include(x => x.FmTargetTestClassMultifields)
+                .ThenInclude(x => x.FmMultiField)
+            .Include(x => x.FmTargetTestClassMultifields)
+                .ThenInclude(x => x.FmMultiFieldValue)
+            .Single();
+
+        await mapper.MapFromDtoDictionary(
+            new Dictionary<string, List<string>>
+            {
+                ["Themen"] = ["Test1", "Test2", "Test1"]
+            },
+            target.FmTargetTestClassMultifields);
+        await _dbContext.SaveChangesAsync();
+
+        _dbContext.ChangeTracker.Clear();
+        target = _dbContext.FmTargetTestClasses
+            .Include(x => x.FmTargetTestClassMultifields)
+                .ThenInclude(x => x.FmMultiField)
+            .Include(x => x.FmTargetTestClassMultifields)
+                .ThenInclude(x => x.FmMultiFieldValue)
+            .Single();
+        var ordered = target.FmTargetTestClassMultifields.OrderBy(x => x.Order).ToArray();
+
+        Assert.HasCount(3, ordered);
+        CollectionAssert.AreEqual(
+            new[] { "Test1", "Test2", "Test1" },
+            ordered.Select(x => x.FmMultiFieldValue!.Value).ToArray());
+        CollectionAssert.AreEqual(new[] { 0, 1, 2 }, ordered.Select(x => x.Order).ToArray());
+
+        await mapper.MapFromDtoDictionary(
+            new Dictionary<string, List<string>> { ["Themen"] = ["Test1", "Test1"] },
+            target.FmTargetTestClassMultifields);
+        await _dbContext.SaveChangesAsync();
+
+        ordered = target.FmTargetTestClassMultifields.OrderBy(x => x.Order).ToArray();
+        Assert.HasCount(2, ordered);
+        CollectionAssert.AreEqual(new[] { 0, 1 }, ordered.Select(x => x.Order).ToArray());
+        Assert.IsTrue(ordered.All(x => x.FmMultiFieldValue!.Value == "Test1"));
+    }
 }
